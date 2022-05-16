@@ -7,7 +7,7 @@
   ],
   "key": {
     "r": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "u": {
       "item": "mininggadgets:upgrade_empty"
@@ -16,7 +16,7 @@
       "item": "minecraft:obsidian"
     },
     "e": {
-      "tag": "forge:ender_pearls"
+      "tag": "c:ender_pearls"
     }
   },
   "result": {

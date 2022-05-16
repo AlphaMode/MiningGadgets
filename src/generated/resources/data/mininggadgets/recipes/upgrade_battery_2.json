@@ -13,7 +13,7 @@
       "item": "minecraft:quartz_block"
     },
     "g": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     "u": {
       "item": "mininggadgets:upgrade_battery_1"

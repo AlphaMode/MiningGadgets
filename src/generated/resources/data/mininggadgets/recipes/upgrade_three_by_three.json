@@ -19,7 +19,7 @@
       "item": "minecraft:diamond_pickaxe"
     },
     "e": {
-      "tag": "forge:ender_pearls"
+      "tag": "c:ender_pearls"
     }
   },
   "result": {
