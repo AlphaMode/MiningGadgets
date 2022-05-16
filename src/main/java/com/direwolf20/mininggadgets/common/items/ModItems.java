@@ -3,19 +3,19 @@ package com.direwolf20.mininggadgets.common.items;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
+import io.github.fabricators_of_create.porting_lib.util.LazyRegistrar;
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.minecraft.core.Registry;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems {
     // The item group is the creative tab it will go into.
     public static final Item.Properties ITEM_GROUP = new Item.Properties().tab(MiningGadgets.itemGroup);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<Item> ITEMS = LazyRegistrar.create(Registry.ITEM, MiningGadgets.MOD_ID);
 
     // We have a separate register just to contain all of the upgrades for quick reference
-    public static final DeferredRegister<Item> UPGRADE_ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<Item> UPGRADE_ITEMS = LazyRegistrar.create(Registry.ITEM, MiningGadgets.MOD_ID);
 
     // Items
     public static final RegistryObject<Item> MININGGADGET_SIMPLE = ITEMS.register("mininggadget_simple", MiningGadget::new);

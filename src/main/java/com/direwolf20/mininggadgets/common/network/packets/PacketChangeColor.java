@@ -2,14 +2,18 @@ package com.direwolf20.mininggadgets.common.network.packets;
 
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
+import me.pepperbell.simplenetworking.C2SPacket;
+import me.pepperbell.simplenetworking.SimpleChannel;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class PacketChangeColor {
+public class PacketChangeColor implements C2SPacket {
     private final short red;
     private final short green;
     private final short blue;
@@ -26,36 +30,33 @@ public class PacketChangeColor {
         this.blue_inner = (short) blue_inner;
     }
 
-    public static void encode(PacketChangeColor msg, FriendlyByteBuf buffer) {
-        buffer.writeShort(msg.red);
-        buffer.writeShort(msg.green);
-        buffer.writeShort(msg.blue);
-        buffer.writeShort(msg.red_inner);
-        buffer.writeShort(msg.green_inner);
-        buffer.writeShort(msg.blue_inner);
+    @Override
+    public void encode(FriendlyByteBuf buffer) {
+        buffer.writeShort(red);
+        buffer.writeShort(green);
+        buffer.writeShort(blue);
+        buffer.writeShort(red_inner);
+        buffer.writeShort(green_inner);
+        buffer.writeShort(blue_inner);
     }
 
-    public static PacketChangeColor decode(FriendlyByteBuf buffer) {
-        return new PacketChangeColor(buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort());
+    public PacketChangeColor(FriendlyByteBuf buffer) {
+        this(buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort());
     }
 
-    public static class Handler {
-        public static void handle(PacketChangeColor msg, Supplier<NetworkEvent.Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                ServerPlayer player = ctx.get().getSender();
-                if (player == null)
-                    return;
+    @Override
+    public void handle(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl listener, PacketSender responseSender, SimpleChannel channel) {
+        server.execute(() -> {
+            if (player == null)
+                return;
 
-                ItemStack stack = MiningGadget.getGadget(player);
-                MiningProperties.setColor(stack, msg.red, MiningProperties.COLOR_RED);
-                MiningProperties.setColor(stack, msg.green, MiningProperties.COLOR_GREEN);
-                MiningProperties.setColor(stack, msg.blue, MiningProperties.COLOR_BLUE);
-                MiningProperties.setColor(stack, msg.red_inner, MiningProperties.COLOR_RED_INNER);
-                MiningProperties.setColor(stack, msg.green_inner, MiningProperties.COLOR_GREEN_INNER);
-                MiningProperties.setColor(stack, msg.blue_inner, MiningProperties.COLOR_BLUE_INNER);
-            });
-
-            ctx.get().setPacketHandled(true);
-        }
+            ItemStack stack = MiningGadget.getGadget(player);
+            MiningProperties.setColor(stack, red, MiningProperties.COLOR_RED);
+            MiningProperties.setColor(stack, green, MiningProperties.COLOR_GREEN);
+            MiningProperties.setColor(stack, blue, MiningProperties.COLOR_BLUE);
+            MiningProperties.setColor(stack, red_inner, MiningProperties.COLOR_RED_INNER);
+            MiningProperties.setColor(stack, green_inner, MiningProperties.COLOR_GREEN_INNER);
+            MiningProperties.setColor(stack, blue_inner, MiningProperties.COLOR_BLUE_INNER);
+        });
     }
 }

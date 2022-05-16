@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mininggadgets",
+  "version": "${version}",
+  "name": "Mining Gadgets",
+  "description": "Mining is better with lasers.",
+  "authors": [
+    "Direwolf20",
+    "AlphaMode"
+  ],
+  "contact": {},
+  "license": "GNU LESSER GENERAL PUBLIC LICENSE Version 2.1",
+  "icon": "mininggadgets-logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.direwolf20.mininggadgets.common.MiningGadgets"
+    ],
+    "client": [
+      "com.direwolf20.mininggadgets.client.ClientSetup"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "modmenu": ">=2.0.2"
+  }
+}

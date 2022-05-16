@@ -7,7 +7,6 @@ import com.direwolf20.mininggadgets.common.Config;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.blocks.RenderBlock;
-import com.direwolf20.mininggadgets.common.capabilities.CapabilityEnergyProvider;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningCollect;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
@@ -17,60 +16,56 @@ import com.direwolf20.mininggadgets.common.sounds.OurSounds;
 import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
 import com.direwolf20.mininggadgets.common.util.MagicHelpers;
 import com.direwolf20.mininggadgets.common.util.VectorHelper;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.Material;
+import com.mojang.blaze3d.platform.InputConstants;
+import io.github.fabricators_of_create.porting_lib.item.ReequipAnimationItem;
+import io.github.fabricators_of_create.porting_lib.mixin.client.accessor.KeyMappingAccessor;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import io.github.fabricators_of_create.porting_lib.util.ContinueUsingItem;
+import io.github.fabricators_of_create.porting_lib.util.DamageableItem;
+import io.github.fabricators_of_create.porting_lib.util.UsingTickItem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.item.TooltipFlag;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.util.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.world.BlockEvent;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import team.reborn.energy.api.EnergyStorage;
 
-public class MiningGadget extends Item {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
+
+public class MiningGadget extends Item implements UsingTickItem, ContinueUsingItem, DamageableItem, ReequipAnimationItem {
     private int energyCapacity;
     private Random rand = new Random();
     private LaserLoopSound laserLoopSound;
@@ -80,7 +75,7 @@ public class MiningGadget extends Item {
         super(new Item.Properties()
                 .stacksTo(1)
                 .tab(MiningGadgets.itemGroup)
-                .setNoRepair());
+                /*.setNoRepair() TODO: PORT*/);
 
         this.energyCapacity = Config.MININGGADGET_MAXPOWER.get();
     }
@@ -94,31 +89,25 @@ public class MiningGadget extends Item {
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        IEnergyStorage energy = stack.getCapability(CapabilityEnergy.ENERGY, null).orElse(null);
-        return (energy.getEnergyStored() < energy.getMaxEnergyStored());
-    }
-
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return new CapabilityEnergyProvider(stack, Config.MININGGADGET_MAXPOWER.get());
+        EnergyStorage energy = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        return (energy.getAmount() < energy.getCapacity());
     }
 
     @Override
     public int getBarWidth(ItemStack stack) {
-        return stack.getCapability(CapabilityEnergy.ENERGY, null)
-                .map(e -> Math.min(13 * e.getEnergyStored() / e.getMaxEnergyStored(), 13))
-                .orElse(0);
+        return Math.toIntExact(Optional.ofNullable(ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM))
+                .map(e -> Math.min(13 * e.getAmount() / e.getCapacity(), 13))
+                .orElse(0L));
     }
 
     @Override
     public int getBarColor(ItemStack stack) {
-        return stack.getCapability(CapabilityEnergy.ENERGY)
-                .map(e -> Mth.hsvToRgb(Math.max(0.0F, (float) e.getEnergyStored() / (float) e.getMaxEnergyStored()) / 3.0F, 1.0F, 1.0F))
+        return Optional.ofNullable(ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM))
+                .map(e -> Mth.hsvToRgb(Math.max(0.0F, (float) e.getAmount() / (float) e.getCapacity()) / 3.0F, 1.0F, 1.0F))
                 .orElse(super.getBarColor(stack));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, world, tooltip, flag);
@@ -148,11 +137,11 @@ public class MiningGadget extends Item {
             }
         }
 
-        stack.getCapability(CapabilityEnergy.ENERGY, null)
+        Optional.ofNullable(ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM))
                 .ifPresent(energy -> {
                     TranslatableComponent energyText = !sneakPressed
-                            ? new TranslatableComponent("mininggadgets.gadget.energy", MagicHelpers.tidyValue(energy.getEnergyStored()), MagicHelpers.tidyValue(energy.getMaxEnergyStored()))
-                            : new TranslatableComponent("mininggadgets.gadget.energy", String.format("%,d", energy.getEnergyStored()), String.format("%,d", energy.getMaxEnergyStored()));
+                            ? new TranslatableComponent("mininggadgets.gadget.energy", MagicHelpers.tidyValue(energy.getAmount()), MagicHelpers.tidyValue(energy.getCapacity()))
+                            : new TranslatableComponent("mininggadgets.gadget.energy", String.format("%,d", energy.getAmount()), String.format("%,d", energy.getCapacity()));
                     tooltip.add(energyText.withStyle(ChatFormatting.GREEN));
                 });
     }
@@ -176,20 +165,20 @@ public class MiningGadget extends Item {
     }
 
     public static boolean canMine(ItemStack tool) {
-        IEnergyStorage energy = tool.getCapability(CapabilityEnergy.ENERGY, null).orElse(null);
+        EnergyStorage energy = ContainerItemContext.withInitial(tool).find(EnergyStorage.ITEM);
         int cost = getEnergyCost(tool);
 
         if (MiningProperties.getRange(tool) == 3)
             cost = cost * 9;
 
-        return energy.getEnergyStored() >= cost;
+        return energy.getAmount() >= cost;
     }
 
     public static boolean canMineBlock(ItemStack tool, Level world, Player player, BlockPos pos, BlockState state) {
         if (!player.mayBuild() || !world.mayInteract(player, pos))
             return false;
 
-        if (MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, player)))
+        if (!PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(world, player, pos, state, null))
             return false;
 
         return canMine(tool);
@@ -227,7 +216,7 @@ public class MiningGadget extends Item {
             }
 
             if (world.isClientSide) {
-                if (OurKeys.shiftClickGuiBinding.getKey() == InputConstants.UNKNOWN) {
+                if (((KeyMappingAccessor)OurKeys.shiftClickGuiBinding).port_lib$getKey() == InputConstants.UNKNOWN) {
                     ModScreens.openGadgetSettingsScreen(itemstack);
                     return InteractionResultHolder.pass(itemstack);
                 }
@@ -315,7 +304,7 @@ public class MiningGadget extends Item {
             world.sendParticles(ParticleTypes.SMOKE, sourcePos.getX() + randomTX, sourcePos.getY() + randomTY, sourcePos.getZ() + randomTZ, 1, 0D, 0D, 0D, 0.0D);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void playLoopSound(LivingEntity player, ItemStack stack) {
         float volume = MiningProperties.getVolume(stack);
         Player myplayer = Minecraft.getInstance().player;
@@ -449,7 +438,12 @@ public class MiningGadget extends Item {
                 else*/
                         durability = durability - 1;
                         if (durability <= 0) {
-                            stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(e -> e.receiveEnergy(getEnergyCost(stack) * -1, false));
+                            EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+                            if (storage != null)
+                                try (Transaction t = TransferUtil.getTransaction()) {
+                                    storage.insert(getEnergyCost(stack) * -1, t);
+                                    t.commit();
+                                }
                             if (MiningProperties.getPrecisionMode(stack)) {
                                 MiningProperties.setCanMine(stack, false);
                                 player.stopUsingItem();
@@ -478,10 +472,15 @@ public class MiningGadget extends Item {
                 pos = lookingAt.getBlockPos().relative(side).relative(right);
 
             if (world.getMaxLocalRawBrightness(pos) <= 7 && world.getBlockState(pos).getMaterial() == Material.AIR) {
-                int energy = stack.getCapability(CapabilityEnergy.ENERGY).map(IEnergyStorage::getEnergyStored).orElse(0);
+                EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+                long energy = storage != null ? storage.getAmount() : 0;
                 if (energy > Config.UPGRADECOST_LIGHT.get()) {
                     world.setBlockAndUpdate(pos, ModBlocks.MINERS_LIGHT.get().defaultBlockState());
-                    stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(e -> e.receiveEnergy((Config.UPGRADECOST_LIGHT.get() * -1), false));
+                    if (storage != null)
+                        try (Transaction t = TransferUtil.getTransaction()) {
+                            storage.insert((Config.UPGRADECOST_LIGHT.get() * -1), t);
+                            t.commit();
+                        }
                 }
             }
         }

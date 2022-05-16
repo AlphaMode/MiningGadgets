@@ -1,39 +1,40 @@
 package com.direwolf20.mininggadgets.common;
 
-import com.direwolf20.mininggadgets.client.ClientEvents;
-import com.direwolf20.mininggadgets.client.ClientSetup;
-import com.direwolf20.mininggadgets.client.OurKeys;
+import com.direwolf20.mininggadgets.client.particles.ModParticles;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.containers.ModContainers;
 import com.direwolf20.mininggadgets.common.events.ServerTickHandler;
+import com.direwolf20.mininggadgets.common.items.EnergisedItem;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.ModItems;
 import com.direwolf20.mininggadgets.common.network.PacketHandler;
+import com.direwolf20.mininggadgets.common.sounds.OurSounds;
+import io.github.fabricators_of_create.porting_lib.util.LazyItemGroup;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import team.reborn.energy.api.EnergyStorage;
 
-@Mod(MiningGadgets.MOD_ID)
-public class MiningGadgets
+public class MiningGadgets implements ModInitializer
 {
     public static final String MOD_ID = "mininggadgets";
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static CreativeModeTab itemGroup = new CreativeModeTab(MiningGadgets.MOD_ID) {
+    public static CreativeModeTab itemGroup = new LazyItemGroup(MiningGadgets.MOD_ID) {
         @Override
         public ItemStack makeIcon() {
             ItemStack itemStack = new ItemStack(ModItems.MININGGADGET.get());
@@ -42,40 +43,46 @@ public class MiningGadgets
         }
     };
 
-    public MiningGadgets() {
-        IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
-
+    @Override
+    public void onInitialize() {
         // Register all of our items, blocks, item blocks, etc
-        ModItems.ITEMS.register(event);
-        ModItems.UPGRADE_ITEMS.register(event);
-        ModBlocks.BLOCKS.register(event);
-        ModBlocks.TILES_ENTITIES.register(event);
-        ModContainers.CONTAINERS.register(event);
+        ModItems.ITEMS.register();
+        ModItems.UPGRADE_ITEMS.register();
+        ModBlocks.BLOCKS.register();
+        ModBlocks.TILES_ENTITIES.register();
+        ModContainers.CONTAINERS.register();
+        ModParticles.PARTICLE_TYPES.register();
 
-        event.addListener(this::setup);
-        event.addListener(this::setupClient);
+        OurSounds.registerSounds();
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_CONFIG);
+        this.setup();
+
+        ModLoadingContext.registerConfig(MOD_ID, ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
+        ModLoadingContext.registerConfig(MOD_ID, ModConfig.Type.COMMON, Config.COMMON_CONFIG);
 
         // Register the setup method for modloading
-        event.addListener(this::setup);
-        MinecraftForge.EVENT_BUS.register(this);
+        UseBlockCallback.EVENT.register(this::rightClickEvent);
 
-        Config.loadConfig(Config.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MOD_ID + "-client.toml"));
-        Config.loadConfig(Config.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MOD_ID + "-common.toml"));
+        Config.loadConfig(Config.CLIENT_CONFIG, FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + "-client.toml"));
+        Config.loadConfig(Config.COMMON_CONFIG, FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + "-common.toml"));
+
+        EnergyStorage.ITEM.registerFallback((itemStack, context) -> {
+            if (itemStack.getItem() instanceof MiningGadget)
+                return new EnergisedItem(itemStack, Config.MININGGADGET_MAXPOWER.get());
+            return null;
+        });
     }
 
-    @SubscribeEvent
-    public void rightClickEvent(PlayerInteractEvent.RightClickBlock event) {
-        ItemStack stack = MiningGadget.getGadget(event.getPlayer());
+    public InteractionResult rightClickEvent(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+        ItemStack stack = MiningGadget.getGadget(player);
         if( stack.getItem() instanceof MiningGadget ) {
-            if (this.stackIsAnnoying(event.getPlayer().getMainHandItem())
-                    || this.stackIsAnnoying(event.getPlayer().getOffhandItem())
-                    || event.getWorld().getBlockState(event.getPos()).getBlock() instanceof RedStoneOreBlock) {
-                event.setCanceled(true);
+            if (this.stackIsAnnoying(player.getMainHandItem())
+                    || this.stackIsAnnoying(player.getOffhandItem())
+                    || world.getBlockState(hitResult.getBlockPos()).getBlock() instanceof RedStoneOreBlock) {
+                return InteractionResult.SUCCESS;
             }
         }
+        return InteractionResult.PASS;
     }
 
     /**
@@ -93,22 +100,10 @@ public class MiningGadgets
                 || block instanceof RedstoneLampBlock || block instanceof EndRodBlock;
     }
 
-    private void setup(final FMLCommonSetupEvent event)
+    private void setup()
     {
         PacketHandler.register();
-        MinecraftForge.EVENT_BUS.register(ServerTickHandler.class);
-    }
-
-    /**
-     * Only run on the client making it a safe place to register client
-     * components. Remember that you shouldn't reference client only
-     * methods in this class as it'll crash the mod :P
-     */
-    private void setupClient(final FMLClientSetupEvent event) {
-        // Register the container screens.
-        ClientSetup.setup();
-        OurKeys.register();
-        MinecraftForge.EVENT_BUS.register(ClientEvents.class);
+        ServerTickEvents.END_SERVER_TICK.register(ServerTickHandler::handleTickEndEvent);
     }
 
     public static Logger getLogger() {

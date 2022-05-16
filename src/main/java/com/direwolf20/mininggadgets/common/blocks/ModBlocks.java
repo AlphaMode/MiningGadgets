@@ -3,18 +3,18 @@ package com.direwolf20.mininggadgets.common.blocks;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.tiles.ModificationTableTileEntity;
 import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
+import io.github.fabricators_of_create.porting_lib.util.LazyRegistrar;
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ModBlocks {
     /**
      * Deferred Registers for the our Main class to load.
      */
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MiningGadgets.MOD_ID);
-    public static final DeferredRegister<BlockEntityType<?>> TILES_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<Block> BLOCKS = LazyRegistrar.create(Registry.BLOCK, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<BlockEntityType<?>> TILES_ENTITIES = LazyRegistrar.create(Registry.BLOCK_ENTITY_TYPE, MiningGadgets.MOD_ID);
 
     /**
      * Register our blocks to the above registers to be loaded when the mod is initialized

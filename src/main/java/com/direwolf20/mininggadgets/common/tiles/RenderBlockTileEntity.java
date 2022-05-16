@@ -8,6 +8,15 @@ import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
 import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeTools;
 import com.direwolf20.mininggadgets.common.util.SpecialBlockActions;
+import dev.architectury.event.events.common.BlockEvent;
+import io.github.fabricators_of_create.porting_lib.block.CustomDataPacketHandlingBlockEntity;
+import io.github.fabricators_of_create.porting_lib.block.CustomExpBlock;
+import io.github.fabricators_of_create.porting_lib.block.CustomUpdateTagHandlingBlockEntity;
+import io.github.fabricators_of_create.porting_lib.event.common.BlockEvents;
+import io.github.fabricators_of_create.porting_lib.mixin.common.accessor.BlockAccessor;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -30,12 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.world.BlockEvent;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +48,7 @@ import java.util.UUID;
 
 import static com.direwolf20.mininggadgets.common.blocks.ModBlocks.RENDERBLOCK_TILE;
 
-public class RenderBlockTileEntity extends BlockEntity {
+public class RenderBlockTileEntity extends BlockEntity implements CustomUpdateTagHandlingBlockEntity, CustomDataPacketHandlingBlockEntity {
     private final Random rand = new Random();
     private BlockState renderBlock;
     private int priorDurability = 9999;
@@ -195,7 +199,8 @@ public class RenderBlockTileEntity extends BlockEntity {
 
     private void freeze(ItemStack stack) {
         int freezeCost = Config.UPGRADECOST_FREEZE.get() * -1;
-        int energy = stack.getCapability(CapabilityEnergy.ENERGY).map(IEnergyStorage::getEnergyStored).orElse(0);
+        EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        long energy = storage != null ? storage.getAmount() : 0;
 
         if (energy == 0) {
             return;
@@ -215,12 +220,17 @@ public class RenderBlockTileEntity extends BlockEntity {
         }
     }
 
-    private int replaceBlockWithAlternative(Level world, BlockPos pos, BlockState state, ItemStack stack, int costOfOperation, int remainingEnergy) {
+    private int replaceBlockWithAlternative(Level world, BlockPos pos, BlockState state, ItemStack stack, int costOfOperation, long remainingEnergy) {
         if (remainingEnergy < costOfOperation) {
             return 0;
         }
 
-        stack.getCapability(CapabilityEnergy.ENERGY).ifPresent(e -> e.receiveEnergy(costOfOperation, false));
+        EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+        if (storage != null)
+            try (Transaction t = TransferUtil.getTransaction()) {
+                storage.insert(costOfOperation, t);
+                t.commit();
+            }
 
         // If the block is just water logged, remove the fluid
         BlockState blockState = world.getBlockState(pos);
@@ -433,8 +443,8 @@ public class RenderBlockTileEntity extends BlockEntity {
         }
 
         // Fire an event for other mods that we've just broken the block
-        BlockEvent.BreakEvent breakEvent = fixForgeEventBreakBlock(this.renderBlock, player, level, worldPosition, tempTool);
-        MinecraftForge.EVENT_BUS.post(breakEvent);
+        BlockEvents.BreakEvent breakEvent = fixForgeEventBreakBlock(this.renderBlock, player, level, worldPosition, tempTool);
+        BlockEvents.BLOCK_BREAK.invoker().onBlockBreak(breakEvent);
         // Someone cancelled out break event
         if (breakEvent.isCanceled()) {
             return;
@@ -444,12 +454,12 @@ public class RenderBlockTileEntity extends BlockEntity {
         List<ItemStack> drops = Block.getDrops(this.renderBlock, (ServerLevel) this.level, this.worldPosition, null, player, tempTool);
 
         if (this.blockAllowed) {
-            int exp = this.renderBlock.getExpDrop(this.level, this.worldPosition, fortune, silk);
+            int exp = this.renderBlock.getBlock() instanceof CustomExpBlock expBlock ? expBlock.getExpDrop(this.renderBlock, this.level, this.worldPosition, fortune, silk) : 0;
             boolean magnetMode = (UpgradeTools.containsActiveUpgradeFromList(this.gadgetUpgrades, Upgrade.MAGNET));
             for (ItemStack drop : drops) {
                 if (drop != null) {
                     if (magnetMode) {
-                        int wasPickedUp = ForgeEventFactory.onItemPickup(new ItemEntity(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), drop), player);
+                        int wasPickedUp = 0;//ForgeEventFactory.onItemPickup(new ItemEntity(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), drop), player);
                         // 1  = someone allowed the event meaning it's handled,
                         // -1 = someone blocked the event and thus we shouldn't drop it nor insert it
                         // 0  = no body captured the event and we should handle it by hand.
@@ -469,7 +479,7 @@ public class RenderBlockTileEntity extends BlockEntity {
                 }
             } else {
                 if (exp > 0) {
-                    this.renderBlock.getBlock().popExperience((ServerLevel) this.level, this.worldPosition, exp);
+                    ((BlockAccessor)this.renderBlock.getBlock()).port_lib$popExperience((ServerLevel) this.level, this.worldPosition, exp);
                 }
             }
 
@@ -495,13 +505,16 @@ public class RenderBlockTileEntity extends BlockEntity {
         }
     }
 
-    private static BlockEvent.BreakEvent fixForgeEventBreakBlock(BlockState state, Player player, Level world, BlockPos pos, ItemStack tool) {
-        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, state, player);
+    private static BlockEvents.BreakEvent fixForgeEventBreakBlock(BlockState state, Player player, Level world, BlockPos pos, ItemStack tool) {
+        BlockEvents.BreakEvent event = new BlockEvents.BreakEvent(world, pos, state, player);
         // Handle empty block or player unable to break block scenario
-        if (state != null && ForgeHooks.isCorrectToolForDrops(state, player)) {
+        if (state != null && player.hasCorrectToolForDrops(state)) {
             int bonusLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, tool);
             int silklevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, tool);
-            event.setExpToDrop(state.getExpDrop(world, pos, bonusLevel, silklevel));
+            if (state.getBlock() instanceof CustomExpBlock xpBlock)
+                event.setExpToDrop(xpBlock.getExpDrop(state, world, pos, bonusLevel, silklevel));
+            else
+                event.setExpToDrop(0);
         }
 
         return event;

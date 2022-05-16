@@ -1,20 +1,20 @@
 package com.direwolf20.mininggadgets.common.data;
 
-import static com.direwolf20.mininggadgets.common.items.ModItems.*;
-
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.data.DataGenerator;
+import me.alphamode.forgetags.Tags;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.Tags;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.function.Consumer;
 
-public class GeneratorRecipes extends RecipeProvider {
-    public GeneratorRecipes(DataGenerator generator) {
+import static com.direwolf20.mininggadgets.common.items.ModItems.*;
+
+public class GeneratorRecipes extends FabricRecipeProvider {
+    public GeneratorRecipes(FabricDataGenerator generator) {
         super(generator);
     }
 
@@ -26,7 +26,7 @@ public class GeneratorRecipes extends RecipeProvider {
      */
 
     @Override
-    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+    protected void generateRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(UPGRADE_EMPTY.get())
             .define('r', Tags.Items.DUSTS_REDSTONE)
             .define('g', Tags.Items.GLASS_PANES)

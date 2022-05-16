@@ -1,7 +1,11 @@
 package com.direwolf20.mininggadgets.common.network.packets;
 
 import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
+import me.pepperbell.simplenetworking.S2CPacket;
+import me.pepperbell.simplenetworking.SimpleChannel;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -10,15 +14,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.util.Tuple;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class PacketDurabilitySync {
+public class PacketDurabilitySync implements S2CPacket {
     private final List<Tuple<BlockPos, Integer>> updateList;
     //private final int priorDurability;
 
@@ -26,8 +27,9 @@ public class PacketDurabilitySync {
         this.updateList = updateList;
     }
 
-    public static void encode(PacketDurabilitySync msg, FriendlyByteBuf buffer) {
-        List<Tuple<BlockPos, Integer>> thisList = msg.updateList;
+    @Override
+    public void encode(FriendlyByteBuf buffer) {
+        List<Tuple<BlockPos, Integer>> thisList = updateList;
         CompoundTag tag = new CompoundTag();
         ListTag nbtList = new ListTag();
         for (int i = 0; i < thisList.size(); i++) {
@@ -40,7 +42,7 @@ public class PacketDurabilitySync {
         buffer.writeNbt(tag);
     }
 
-    public static PacketDurabilitySync decode(FriendlyByteBuf buffer) {
+    public PacketDurabilitySync(FriendlyByteBuf buffer) {
         CompoundTag tag = buffer.readNbt();
         ListTag nbtList = tag.getList("list", Tag.TAG_COMPOUND);
         List<Tuple<BlockPos, Integer>> thisList = new ArrayList<>();
@@ -48,14 +50,12 @@ public class PacketDurabilitySync {
             CompoundTag nbt = nbtList.getCompound(i);
             thisList.add(new Tuple<>(NbtUtils.readBlockPos(nbt.getCompound("pos")), nbt.getInt("dur")));
         }
-        return new PacketDurabilitySync(thisList);
+        this.updateList = thisList;
     }
 
-    public static class Handler {
-        public static void handle(PacketDurabilitySync msg, Supplier<NetworkEvent.Context> ctx) {
-            ctx.get().enqueueWork(() -> DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> clientPacketHandler(msg)));
-            ctx.get().setPacketHandled(true);
-        }
+    @Override
+    public void handle(Minecraft client, ClientPacketListener listener, PacketSender responseSender, SimpleChannel channel) {
+        client.execute(() -> clientPacketHandler(this));
     }
 
     public static void clientPacketHandler(PacketDurabilitySync msg) {

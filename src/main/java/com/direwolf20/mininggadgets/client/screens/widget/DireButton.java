@@ -36,9 +36,9 @@ public class DireButton extends Button {
 
             int j = 14737632;
 
-            if (this.packedFGColor != 0) {
+            /*if (this.packedFGColor != 0) {
                 j = this.packedFGColor;
-            } else if (!this.active) {
+            } else */if (!this.active) {
                 j = 10526880;
             } else if (this.isHovered) {
                 j = 16777120;

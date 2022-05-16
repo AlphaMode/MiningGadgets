@@ -5,6 +5,9 @@ import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
 import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeTools;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.UpgradeCard;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,25 +19,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ModificationTableContainer extends AbstractContainerMenu {
 
     private BlockEntity tileEntity;
-    private IItemHandler playerInventory;
+    private Inventory playerInventory;
     private List<Upgrade> upgradesCache = new ArrayList<>();
 
     public ModificationTableContainer(int windowId, Inventory playerInventory, FriendlyByteBuf extraData) {
         super(ModContainers.MODIFICATIONTABLE_CONTAINER.get(), windowId);
 
         this.tileEntity = Minecraft.getInstance().level.getBlockEntity(extraData.readBlockPos());
-        this.playerInventory = new InvWrapper(playerInventory);
+        this.playerInventory = playerInventory;
 
         setupContainerSlots();
         layoutPlayerInventorySlots(8, 84);
@@ -43,7 +43,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     public ModificationTableContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory) {
         super(ModContainers.MODIFICATIONTABLE_CONTAINER.get(), windowId);
         this.tileEntity = world.getBlockEntity(pos);
-        this.playerInventory = new InvWrapper(playerInventory);
+        this.playerInventory = playerInventory;
 
         setupContainerSlots();
         layoutPlayerInventorySlots(10, 70);
@@ -55,8 +55,8 @@ public class ModificationTableContainer extends AbstractContainerMenu {
     }
 
     private void setupContainerSlots() {
-        this.getTE().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-            addSlot(new WatchedSlot(h, 0,  -16, 84, this::updateUpgradeCache));
+        Optional.ofNullable(TransferUtil.getItemStorage(this.getTE())).ifPresent(h -> {
+            addSlot(new WatchedSlot((ItemStackHandler) h, 0,  -16, 84, this::updateUpgradeCache));
         });
     }
 
@@ -80,16 +80,16 @@ public class ModificationTableContainer extends AbstractContainerMenu {
         return this.tileEntity;
     }
 
-    private int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
+    private int addSlotRange(Inventory handler, int index, int x, int y, int amount, int dx) {
         for (int i = 0; i < amount; i++) {
-            addSlot(new SlotItemHandler(handler, index, x, y));
+            addSlot(new Slot(handler, index, x, y));
             x += dx;
             index++;
         }
         return index;
     }
 
-    private int addSlotBox(IItemHandler handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
+    private int addSlotBox(Inventory handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
         for (int j = 0; j < verAmount; j++) {
             index = addSlotRange(handler, index, x, y, horAmount, dx);
             y += dy;

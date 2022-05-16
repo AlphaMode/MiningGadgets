@@ -1,21 +1,19 @@
 package com.direwolf20.mininggadgets.common.data;
 
-import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
-import net.minecraft.data.DataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.minecraft.core.Registry;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.tags.BlockTags;
-import net.minecraftforge.common.data.ExistingFileHelper;
-
-import javax.annotation.Nullable;
+import net.minecraft.tags.TagKey;
 
 public class GeneratorBlockTags extends BlockTagsProvider {
-    public GeneratorBlockTags(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
-        super(generator, MiningGadgets.MOD_ID, existingFileHelper);
+    public GeneratorBlockTags(FabricDataGenerator generator) {
+        super(generator);
     }
 
     @Override
     protected void addTags() {
-        tag(BlockTags.create(ModBlocks.MODIFICATION_TABLE.get().getRegistryName())).addTags(BlockTags.MINEABLE_WITH_PICKAXE);
+        tag(TagKey.create(Registry.BLOCK_REGISTRY, Registry.BLOCK.getKey(ModBlocks.MODIFICATION_TABLE.get()))).addTag(BlockTags.MINEABLE_WITH_PICKAXE);
     }
 }

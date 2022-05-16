@@ -2,13 +2,13 @@ package com.direwolf20.mininggadgets.common.items.upgrade;
 
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.UpgradeCard;
+import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.common.ForgeI18n;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

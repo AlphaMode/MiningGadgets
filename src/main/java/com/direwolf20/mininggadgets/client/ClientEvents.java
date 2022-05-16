@@ -5,38 +5,49 @@ import com.direwolf20.mininggadgets.client.renderer.ModificationShiftOverlay;
 import com.direwolf20.mininggadgets.client.renderer.RenderMiningLaser;
 import com.direwolf20.mininggadgets.client.screens.ModScreens;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.event.client.DrawSelectionEvents;
+import io.github.fabricators_of_create.porting_lib.event.client.KeyInputCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.List;
 
 public class ClientEvents {
-    @SubscribeEvent
-    static void drawBlockHighlightEvent(DrawSelectionEvent evt) {
-        if( Minecraft.getInstance().player == null )
-            return;
 
-        if(MiningGadget.isHolding(Minecraft.getInstance().player))
-            evt.setCanceled(true);
+    public static void init() {
+        DrawSelectionEvents.BLOCK.register(ClientEvents::drawBlockHighlightEvent);
+        WorldRenderEvents.END.register(ClientEvents::renderWorldLastEvent);
+        KeyInputCallback.EVENT.register(ClientEvents::keyPressed);
     }
 
-    @SubscribeEvent
-    static void renderWorldLastEvent(RenderLevelLastEvent evt) {
+    static boolean drawBlockHighlightEvent(LevelRenderer context, Camera info, HitResult target, float partialTicks, PoseStack matrix, MultiBufferSource buffers) {
+        if( Minecraft.getInstance().player == null )
+            return false;
+
+        if(MiningGadget.isHolding(Minecraft.getInstance().player))
+            return true;
+        return false;
+    }
+
+    static void renderWorldLastEvent(WorldRenderContext context) {
         List<AbstractClientPlayer> players = Minecraft.getInstance().level.players();
         Player myplayer = Minecraft.getInstance().player;
 
         ItemStack myItem = MiningGadget.getGadget(myplayer);
         if (myItem.getItem() instanceof MiningGadget)
-            BlockOverlayRender.render(evt, myItem);
+            BlockOverlayRender.render(context.matrixStack(), myItem);
 
         if (myplayer.isShiftKeyDown()) {
-            ModificationShiftOverlay.render(evt, myplayer);
+            ModificationShiftOverlay.render(context.matrixStack(), context.tickDelta(), myplayer);
         }
 
         for (Player player : players) {
@@ -46,14 +57,13 @@ public class ClientEvents {
             ItemStack heldItem = MiningGadget.getGadget(player);
             if (player.isUsingItem() && heldItem.getItem() instanceof MiningGadget) {
                 if (MiningGadget.canMine(heldItem)) {
-                    RenderMiningLaser.renderLaser(evt, player, Minecraft.getInstance().getFrameTime());
+                    RenderMiningLaser.renderLaser(context.matrixStack(), player, Minecraft.getInstance().getFrameTime());
                 }
             }
         }
     }
 
-    @SubscribeEvent
-    static void keyPressed(InputEvent.KeyInputEvent event) {
+    static void keyPressed(int key, int scancode, int action, int mods) {
         if (OurKeys.shiftClickGuiBinding.consumeClick() && Minecraft.getInstance().screen == null) {
             if (Minecraft.getInstance().player == null) {
                 return;

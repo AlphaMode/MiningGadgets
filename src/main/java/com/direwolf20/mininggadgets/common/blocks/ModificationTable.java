@@ -1,5 +1,11 @@
 package com.direwolf20.mininggadgets.common.blocks;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
+import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,15 +27,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraftforge.network.NetworkHooks;
 
 public class ModificationTable extends Block implements EntityBlock {
     public static DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -64,7 +66,7 @@ public class ModificationTable extends Block implements EntityBlock {
         if (!world.isClientSide) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof MenuProvider) {
-                NetworkHooks.openGui((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
+                NetworkUtil.openGui((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
             } else {
                 throw new IllegalStateException("Our named container provider is missing!");
             }
@@ -78,10 +80,12 @@ public class ModificationTable extends Block implements EntityBlock {
         if (newState.getBlock() != this) {
             BlockEntity tileEntity = worldIn.getBlockEntity(pos);
             if (tileEntity != null) {
-                LazyOptional<IItemHandler> cap = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+                LazyOptional<Storage<ItemVariant>> cap = LazyOptional.ofObject(TransferUtil.getItemStorage(tileEntity));
                 cap.ifPresent(handler -> {
-                    for(int i = 0; i < handler.getSlots(); ++i) {
-                        Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), handler.getStackInSlot(i));
+                    try (Transaction t = TransferUtil.getTransaction()) {
+                        handler.iterable(t).forEach(view -> {
+                            Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), view.getResource().toStack((int) view.getAmount()));
+                        });
                     }
                 });
             }

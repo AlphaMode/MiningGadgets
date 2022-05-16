@@ -28,25 +28,25 @@ public class GeneratorLoot extends LootTableProvider {
         super(generator);
     }
 
-    @Override
+//    @Override
     protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
         return ImmutableList.of(
                 Pair.of(Blocks::new, LootContextParamSets.BLOCK)
         );
     }
 
-    @Override
+//    @Override
     protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationresults) {
         map.forEach((name, table) -> LootTables.validate(validationresults, name, table));
     }
 
     private static class Blocks extends BlockLoot {
-        @Override
+//        @Override
         protected void addTables() {
             this.dropSelf(ModBlocks.MODIFICATION_TABLE.get());
         }
 
-        @Override
+//        @Override
         protected Iterable<Block> getKnownBlocks() {
             return Collections.singletonList(ModBlocks.MODIFICATION_TABLE.get());
         }

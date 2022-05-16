@@ -1,19 +1,13 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'io.github.juuxel.loom-quiltflower' version '1.+'
+    id 'org.quiltmc.quilt-mappings-on-loom' version '4.+'
+    id 'eclipse'
+    id 'maven-publish'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
 version = "${mod_version}"
 group = 'com.direwolf20.mininggadgets' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -21,79 +15,12 @@ archivesBaseName = 'mininggadgets'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-minecraft {
-    hideOfficialWarningUntilChanged
-
-    mappings channel: 'official', version: "${mc_version}"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-
-
-            mods {
-                mininggadgets {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                mininggadgets {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'mininggadgets', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            mods {
-                mininggadgets {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
-}
-
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // JEI
+    // REI
     maven {
-        name = "Progwml6 maven"
-        url = "https://dvs1.progwml6.com/files/maven/"
-    }
-    //JEI fallback
-    maven {
-        name = "ModMaven"
-        url = "https://modmaven.k-4u.nl"
+        url = "https://maven.shedaniel.me/"
     }
     maven { url 'https://www.dogforce-games.com/maven/' }
     maven {
@@ -102,14 +29,42 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven { url 'https://jitpack.io' }
+    maven { url = "https://mvn.devos.one/releases/" }
+    maven { url = "https://mvn.devos.one/snapshots/" }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    minecraft "com.mojang:minecraft:${project.mc_version}"
+
+    mappings loom.layered() {
+        it.addLayer(quiltMappings.mappings("org.quiltmc:quilt-mappings:1.18.2+build.22:v2")) // https://maven.quiltmc.org/#browse/browse:release
+        it.parchment("org.parchmentmc.data:parchment-1.18.2:BLEEDING-20220313.132143-1@zip") // https://ldtteam.jfrog.io/ui/native/parchmentmc-public/org/parchmentmc/data/parchment-1.18.1/BLEEDING-SNAPSHOT
+        it.officialMojangMappings {
+            setNameSyntheticMembers(true)
+        }
+    }
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
+    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    implementation(include("com.electronwill.night-config:core:3.6.3"))
+    implementation(include("com.electronwill.night-config:toml:3.6.3"))
+    modImplementation(include("curse.maven:forge-config-api-port-fabric-547434:${project.config_api_version}"))
+
+    modImplementation(include("me.alphamode:ForgeTags:2.1"))
+    modImplementation(include("io.github.fabricators_of_create:Porting-Lib:${project.port_lib_version}+${project.mc_version}.${project.port_lib_hash}"))
+
+    include modApi('teamreborn:energy:2.2.0') {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 
 //    runtimeOnly fg.deobf("curse.maven:inventory-tweaks-renewed:3102237")
 //    runtimeOnly fg.deobf("curse.maven:lollipop-347954:3232534")
@@ -152,8 +107,6 @@ jar {
         ])
     }
 }
-
-jar.finalizedBy('reobfJar')
 
 publishing {
     publications {

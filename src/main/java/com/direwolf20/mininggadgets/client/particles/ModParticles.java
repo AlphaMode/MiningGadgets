@@ -1,36 +1,24 @@
 package com.direwolf20.mininggadgets.client.particles;
 
-import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.client.particles.laserparticle.LaserParticleData;
 import com.direwolf20.mininggadgets.client.particles.laserparticle.LaserParticleType;
 import com.direwolf20.mininggadgets.client.particles.lightparticle.LightParticleType;
 import com.direwolf20.mininggadgets.client.particles.playerparticle.PlayerParticleData;
 import com.direwolf20.mininggadgets.client.particles.playerparticle.PlayerParticleType;
+import com.direwolf20.mininggadgets.common.MiningGadgets;
+import io.github.fabricators_of_create.porting_lib.util.LazyRegistrar;
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ObjectHolder;
 
 // TODO: 12/07/2020 Replaces this with a deffered register
-@Mod.EventBusSubscriber(modid = MiningGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-@ObjectHolder(MiningGadgets.MOD_ID)
 public class ModParticles {
-    @ObjectHolder("laserparticle")
-    public static ParticleType<LaserParticleData> LASERPARTICLE;
 
-    @ObjectHolder("playerparticle")
-    public static ParticleType<PlayerParticleData> PLAYERPARTICLE;
+    public static final LazyRegistrar<ParticleType<?>> PARTICLE_TYPES = LazyRegistrar.create(Registry.PARTICLE_TYPE, MiningGadgets.MOD_ID);
 
-    @ObjectHolder("light_particle")
-    public static LightParticleType LIGHT_PARTICLE;
+    public static RegistryObject<ParticleType<LaserParticleData>> LASERPARTICLE = PARTICLE_TYPES.register("laserparticle", LaserParticleType::new);
 
-    @SubscribeEvent
-    public static void registerParticles(RegistryEvent.Register<ParticleType<?>> evt) {
-        evt.getRegistry().registerAll(
-                new LaserParticleType().setRegistryName("laserparticle"),
-                new PlayerParticleType().setRegistryName("playerparticle"),
-                new LightParticleType().setRegistryName("light_particle")
-        );
-    }
+    public static RegistryObject<ParticleType<PlayerParticleData>> PLAYERPARTICLE = PARTICLE_TYPES.register("playerparticle", () -> new PlayerParticleType());
+
+    public static RegistryObject<LightParticleType> LIGHT_PARTICLE = PARTICLE_TYPES.register("light_particle", LightParticleType::new);
 }

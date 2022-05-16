@@ -3,6 +3,7 @@ package com.direwolf20.mininggadgets.common.data;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.items.ModItems;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -17,8 +18,8 @@ public class GeneratorItemModels extends ItemModelProvider {
     @Override
     protected void registerModels() {
         // Register all of the upgrade items
-        ModItems.UPGRADE_ITEMS.getEntries().forEach(item -> {
-            String path = item.get().getRegistryName().getPath();
+        ModItems.UPGRADE_ITEMS.getEntires().forEach(item -> {
+            String path = Registry.ITEM.getKey(item.get()).getPath();
             singleTexture(path, mcLoc("item/handheld"), "layer0", modLoc("item/" + path));
         });
 
@@ -28,7 +29,7 @@ public class GeneratorItemModels extends ItemModelProvider {
     }
 
     private void registerBlockModel(Block block) {
-        String path = block.getRegistryName().getPath();
+        String path = Registry.BLOCK.getKey(block).getPath();
         getBuilder(path).parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
     }
 

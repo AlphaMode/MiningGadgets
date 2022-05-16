@@ -65,7 +65,7 @@ public class MinersLight extends Block {
         double d0 = (double) pos.getX() + 0.5D;
         double d1 = (double) pos.getY() + 0.5D;
         double d2 = (double) pos.getZ() + 0.5D;
-        worldIn.addParticle(ModParticles.LIGHT_PARTICLE, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+        worldIn.addParticle(ModParticles.LIGHT_PARTICLE.get(), d0, d1, d2, 0.0D, 0.0D, 0.0D);
         //worldIn.addParticle(ParticleTypes.FLAME, d0, d1, d2, 0.0D, 0.0D, 0.0D);
     }
 

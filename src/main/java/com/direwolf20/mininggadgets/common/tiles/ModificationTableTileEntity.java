@@ -1,36 +1,34 @@
 package com.direwolf20.mininggadgets.common.tiles;
 
-import static com.direwolf20.mininggadgets.common.blocks.ModBlocks.MODIFICATIONTABLE_TILE;
-
 import com.direwolf20.mininggadgets.common.containers.ModificationTableContainer;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemTransferable;
+import io.github.fabricators_of_create.porting_lib.util.INBTSerializable;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ModificationTableTileEntity extends BlockEntity implements MenuProvider {
-    public final LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
+import static com.direwolf20.mininggadgets.common.blocks.ModBlocks.MODIFICATIONTABLE_TILE;
+
+public class ModificationTableTileEntity extends BlockEntity implements MenuProvider, ItemTransferable {
+    public final LazyOptional<ItemStackHandler> handler = LazyOptional.of(this::createHandler);
 
     public ModificationTableTileEntity(BlockPos pos, BlockState state) {
         super(MODIFICATIONTABLE_TILE.get(), pos, state);
@@ -64,7 +62,7 @@ public class ModificationTableTileEntity extends BlockEntity implements MenuProv
         });
     }
 
-    private IItemHandler createHandler() {
+    private ItemStackHandler createHandler() {
         return new ItemStackHandler(2) {
             @Override
             protected void onContentsChanged(int slot) {
@@ -72,24 +70,21 @@ public class ModificationTableTileEntity extends BlockEntity implements MenuProv
             }
 
             @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return slot == 0 && stack.getItem() instanceof MiningGadget;
+            public boolean isItemValid(int slot, @Nonnull ItemVariant variant) {
+                return slot == 0 && variant.getItem() instanceof MiningGadget;
             }
         };
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return handler.cast();
-        }
-        return super.getCapability(cap, side);
+    public Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        return handler.getValueUnsafer();
     }
 
     @Override
     public Component getDisplayName() {
-        return new TextComponent(getType().getRegistryName().getPath());
+        return new TextComponent(Registry.BLOCK_ENTITY_TYPE.getKey(getType()).getPath());
     }
 
     @Nullable

@@ -3,18 +3,19 @@ package com.direwolf20.mininggadgets.client.renderer;
 import com.direwolf20.mininggadgets.common.items.ModItems;
 import com.direwolf20.mininggadgets.common.tiles.ModificationTableTileEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.Direction;
-import com.mojang.math.Vector3f;
-import net.minecraftforge.items.CapabilityItemHandler;
+
+import java.util.List;
 
 public class ModificationTableTER implements BlockEntityRenderer<ModificationTableTileEntity> {
     public ModificationTableTER(BlockEntityRendererProvider.Context p_173636_) {
@@ -23,7 +24,10 @@ public class ModificationTableTER implements BlockEntityRenderer<ModificationTab
 
     @Override
     public void render(ModificationTableTileEntity tile, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int combinedLights, int combinedOverlay) {
-        ItemStack stack = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(e -> e.getStackInSlot(0)).orElse(ItemStack.EMPTY);
+        List<ItemStack> itemStacks = TransferUtil.getItems(TransferUtil.getItemStorage(tile), 1);
+        if (itemStacks.size() == 0)
+            return;
+        ItemStack stack = itemStacks.get(0);
         if (stack.isEmpty()) {
             return;
         }

@@ -1,22 +1,15 @@
 package com.direwolf20.mininggadgets.client.particles;
 
-import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.client.particles.laserparticle.LaserParticle;
 import com.direwolf20.mininggadgets.client.particles.lightparticle.LightParticleType;
 import com.direwolf20.mininggadgets.client.particles.playerparticle.PlayerParticleType;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 
-@Mod.EventBusSubscriber(modid = MiningGadgets.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ParticleRenderDispatcher {
 
-    @SubscribeEvent
-    public static void registerFactories(ParticleFactoryRegisterEvent evt) {
-        Minecraft.getInstance().particleEngine.register(ModParticles.LASERPARTICLE, LaserParticle.FACTORY);
-        Minecraft.getInstance().particleEngine.register(ModParticles.PLAYERPARTICLE, PlayerParticleType.FACTORY::new);
-        Minecraft.getInstance().particleEngine.register(ModParticles.LIGHT_PARTICLE, LightParticleType.LightParticleFactory::new);
+    public static void registerFactories() {
+        ParticleFactoryRegistry.getInstance().register(ModParticles.LASERPARTICLE.get(), LaserParticle.FACTORY);
+        ParticleFactoryRegistry.getInstance().register(ModParticles.PLAYERPARTICLE.get(), PlayerParticleType.FACTORY::new);
+        ParticleFactoryRegistry.getInstance().register(ModParticles.LIGHT_PARTICLE.get(), LightParticleType.LightParticleFactory::new);
     }
 }

@@ -2,37 +2,38 @@ package com.direwolf20.mininggadgets.common.network.packets;
 
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
+import me.pepperbell.simplenetworking.C2SPacket;
+import me.pepperbell.simplenetworking.SimpleChannel;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
 
 
 import java.util.function.Supplier;
 
-public class PacketChangeBreakType {
+public class PacketChangeBreakType implements C2SPacket {
     public PacketChangeBreakType() {
     }
 
-    public static void encode(PacketChangeBreakType msg, FriendlyByteBuf buffer) {
+    @Override
+    public void encode(FriendlyByteBuf buffer) {
     }
 
-    public static PacketChangeBreakType decode(FriendlyByteBuf buffer) {
-        return new PacketChangeBreakType();
+    public PacketChangeBreakType(FriendlyByteBuf buffer) {
+        this();
     }
 
-    public static class Handler {
-        public static void handle(PacketChangeBreakType msg, Supplier<NetworkEvent.Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                ServerPlayer player = ctx.get().getSender();
-                if (player == null)
-                    return;
+    @Override
+    public void handle(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl listener, PacketSender responseSender, SimpleChannel channel) {
+        server.execute(() -> {
+            if (player == null)
+                return;
 
-                ItemStack stack = MiningGadget.getGadget(player);
-                MiningProperties.nextBreakType(stack);
-            });
-
-            ctx.get().setPacketHandled(true);
-        }
+            ItemStack stack = MiningGadget.getGadget(player);
+            MiningProperties.nextBreakType(stack);
+        });
     }
 }

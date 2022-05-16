@@ -4,7 +4,6 @@ import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.items.ModItems;
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.common.data.LanguageProvider;
 
 public class GeneratorLanguage extends LanguageProvider {
     public GeneratorLanguage(DataGenerator gen) {

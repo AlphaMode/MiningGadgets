@@ -1,13 +1,10 @@
 package com.direwolf20.mininggadgets.common.sounds;
 
 import com.direwolf20.mininggadgets.common.MiningGadgets;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = MiningGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum OurSounds {
     LASER_LOOP("mining_laser_loop"),
     LASER_START("mining_laser_start1"),
@@ -16,17 +13,13 @@ public enum OurSounds {
 
     OurSounds(String name) {
         ResourceLocation loc = new ResourceLocation(MiningGadgets.MOD_ID, name);
-        sound = new SoundEvent(loc).setRegistryName(name);
+        sound = Registry.register(Registry.SOUND_EVENT, loc, new SoundEvent(loc));
     }
 
     public SoundEvent getSound() {
         return sound;
     }
 
-    @SubscribeEvent
-    public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
-        for (OurSounds sound : values()) {
-            event.getRegistry().register(sound.getSound());
-        }
+    public static void registerSounds() {
     }
 }

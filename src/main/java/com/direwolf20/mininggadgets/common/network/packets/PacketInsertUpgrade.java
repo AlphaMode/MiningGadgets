@@ -3,19 +3,23 @@ package com.direwolf20.mininggadgets.common.network.packets;
 import com.direwolf20.mininggadgets.common.containers.ModificationTableCommands;
 import com.direwolf20.mininggadgets.common.containers.ModificationTableContainer;
 import com.direwolf20.mininggadgets.common.tiles.ModificationTableTileEntity;
+import me.pepperbell.simplenetworking.C2SPacket;
+import me.pepperbell.simplenetworking.SimpleChannel;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public final class PacketInsertUpgrade {
-    public static PacketInsertUpgrade decode(FriendlyByteBuf buffer) {
-        return new PacketInsertUpgrade(buffer.readBlockPos(), buffer.readItem());
+public final class PacketInsertUpgrade implements C2SPacket {
+    public PacketInsertUpgrade(FriendlyByteBuf buffer) {
+        this(buffer.readBlockPos(), buffer.readItem());
     }
 
     private final BlockPos pos;
@@ -26,14 +30,15 @@ public final class PacketInsertUpgrade {
         this.upgrade = stack;
     }
 
+    @Override
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeBlockPos(pos);
         buffer.writeItem(upgrade);
     }
 
-    public void handler(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    @Override
+    public void handle(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl listener, PacketSender responseSender, SimpleChannel channel) {
+        server.execute(() -> {
             if (player == null) return;
 
             Level world = player.level;
@@ -52,7 +57,5 @@ public final class PacketInsertUpgrade {
                 player.containerMenu.setCarried(ItemStack.EMPTY);
             }
         });
-
-        ctx.get().setPacketHandled(true);
     }
 }

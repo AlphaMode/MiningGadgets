@@ -4,28 +4,26 @@ import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningCollect;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.util.VectorHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.world.level.block.Blocks;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import com.mojang.math.Matrix4f;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import com.mojang.math.Vector3f;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
-
 
 import java.awt.*;
 import java.util.List;
 
 public class BlockOverlayRender {
 
-    public static void render(RenderLevelLastEvent event, ItemStack item) {
+    public static void render(PoseStack matrix, ItemStack item) {
         final Minecraft mc = Minecraft.getInstance();
 
         MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -39,7 +37,6 @@ public class BlockOverlayRender {
         List<BlockPos> coords = MiningCollect.collect(mc.player, lookingAt, mc.level, MiningProperties.getRange(item));
         Vec3 view = mc.gameRenderer.getMainCamera().getPosition();
 
-        PoseStack matrix = event.getPoseStack();
         matrix.pushPose();
         matrix.translate(-view.x(), -view.y(), -view.z());
 

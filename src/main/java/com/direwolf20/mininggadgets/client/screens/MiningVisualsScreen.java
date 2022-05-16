@@ -6,15 +6,18 @@ import com.direwolf20.mininggadgets.common.network.packets.PacketChangeBreakType
 import com.direwolf20.mininggadgets.common.network.packets.PacketChangeColor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.fabricators_of_create.porting_lib.mixin.client.accessor.ScreenAccessor;
+import io.github.fabricators_of_create.porting_lib.util.KeyBindingHelper;
+import io.github.fabricators_of_create.porting_lib.util.client.Slider;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.gui.widget.Slider;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class MiningVisualsScreen extends Screen implements Slider.ISlider {
     private ItemStack gadget;
@@ -134,7 +137,8 @@ public class MiningVisualsScreen extends Screen implements Slider.ISlider {
             return true;
         }
 
-        if (getMinecraft().options.keyInventory.isActiveAndMatches(mouseKey)) {
+        InputConstants.Key invKeyCode = KeyBindingHelper.getKeyCode(((ScreenAccessor)this).port_lib$getMinecraft().options.keyInventory);
+        if (Objects.equals(invKeyCode, mouseKey)) {
             syncColors();
             removed();
             return true;

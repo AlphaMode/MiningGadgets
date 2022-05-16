@@ -9,6 +9,9 @@ import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.network.packets.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.fabricators_of_create.porting_lib.mixin.client.accessor.ScreenAccessor;
+import io.github.fabricators_of_create.porting_lib.util.KeyBindingHelper;
+import io.github.fabricators_of_create.porting_lib.util.client.Slider;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -29,7 +32,6 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.gui.widget.Slider;
 
 public class MiningSettingScreen extends Screen implements Slider.ISlider {
     private ItemStack gadget;
@@ -173,11 +175,11 @@ public class MiningSettingScreen extends Screen implements Slider.ISlider {
 
         int top = (height / 2) - (containsFreeze ? 80 : 60);
 
-        drawString(stack, getMinecraft().font, getTrans("tooltip.screen.mining_gadget"), (width / 2) - 135, top, Color.WHITE.getRGB());
-        drawString(stack, getMinecraft().font, getTrans("tooltip.screen.toggle_upgrades"), (width / 2) + 10, top, Color.WHITE.getRGB());
+        drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.mining_gadget"), (width / 2) - 135, top, Color.WHITE.getRGB());
+        drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.toggle_upgrades"), (width / 2) + 10, top, Color.WHITE.getRGB());
 
         if( toggleableList.size() == 0 )
-            drawString(stack, getMinecraft().font, getTrans("tooltip.screen.no_upgrades"), (width / 2) + 10, top + 20, Color.GRAY.getRGB());
+            drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.no_upgrades"), (width / 2) + 10, top + 20, Color.GRAY.getRGB());
 
         this.children().forEach(e -> {
             if( !(e instanceof ToggleButton) && !(e instanceof WhitelistButton) && !e.equals(freezeDelaySlider) )
@@ -220,7 +222,8 @@ public class MiningSettingScreen extends Screen implements Slider.ISlider {
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
         InputConstants.Key mouseKey = InputConstants.getKey(p_keyPressed_1_, p_keyPressed_2_);
-        if (p_keyPressed_1_ == 256 || minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {
+        InputConstants.Key invKeyCode = KeyBindingHelper.getKeyCode(minecraft.options.keyInventory);
+        if (p_keyPressed_1_ == 256 || Objects.equals(invKeyCode, mouseKey)) {
             onClose();
 
             return true;
