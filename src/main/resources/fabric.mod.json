@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "id": "mininggadgets",
   "version": "${version}",
-  "name": "Mining Gadgets",
+  "name": "Mining Gadgets Fabric",
   "description": "Mining is better with lasers.",
   "authors": [
     "Direwolf20",
     "AlphaMode"
   ],
   "contact": {},
-  "license": "GNU LESSER GENERAL PUBLIC LICENSE Version 2.1",
+  "license": "MIT",
   "icon": "mininggadgets-logo.png",
   "environment": "*",
   "entrypoints": {
