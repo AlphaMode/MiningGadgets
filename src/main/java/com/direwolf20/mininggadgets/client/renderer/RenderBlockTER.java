@@ -6,6 +6,7 @@ import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.fabricators_of_create.porting_lib.util.client.VertexUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -45,7 +46,7 @@ public class RenderBlockTER implements BlockEntityRenderer<RenderBlockTileEntity
                 f2 = 1f;
             }
 
-            builder.putBulkData(matrixEntry, bakedquad, f, f1, f2/*, alpha*/, combinedLightsIn, combinedOverlayIn);
+            VertexUtils.putBulkData(builder, matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn);
         }
     }
 

@@ -153,7 +153,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
             return;
 
         ItemStack charged = new ItemStack(this);
-        charged.getOrCreateTag().putDouble("energy", Config.MININGGADGET_MAXPOWER.get());
+        charged.getOrCreateTag().putLong("energy", Config.MININGGADGET_MAXPOWER.get());
         items.add(charged);
     }
 
@@ -438,12 +438,13 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
                 else*/
                         durability = durability - 1;
                         if (durability <= 0) {
-                            EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
-                            if (storage != null)
+                            EnergyStorage storage = ContainerItemContext.ofPlayerHand((Player) player, InteractionHand.MAIN_HAND).find(EnergyStorage.ITEM);
+                            if (storage != null) {
                                 try (Transaction t = TransferUtil.getTransaction()) {
-                                    storage.insert(getEnergyCost(stack) * -1, t);
+                                    storage.extract(getEnergyCost(stack), t);
                                     t.commit();
                                 }
+                            }
                             if (MiningProperties.getPrecisionMode(stack)) {
                                 MiningProperties.setCanMine(stack, false);
                                 player.stopUsingItem();

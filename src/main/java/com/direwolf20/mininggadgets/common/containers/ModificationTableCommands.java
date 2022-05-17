@@ -7,12 +7,9 @@ import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeBatteryLevels;
 import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeTools;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.UpgradeCard;
-import com.direwolf20.mininggadgets.common.items.EnergisedItem;
-import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 
@@ -52,9 +49,7 @@ public class ModificationTableCommands {
             // Did we just insert a battery upgrade?
             if(card.getBaseName().equals(Upgrade.BATTERY_1.getBaseName())) {
                 UpgradeBatteryLevels.getBatteryByLevel(card.getTier()).ifPresent(power -> {
-                    EnergyStorage e = ContainerItemContext.withInitial(laser).find(EnergyStorage.ITEM);
-                    if (e != null)
-                        ((EnergisedItem) e).updatedMaxEnergy(power.getPower());
+                    laser.getOrCreateTag().putLong("max_energy", power.getPower());
                 });
             }
 
@@ -95,9 +90,7 @@ public class ModificationTableCommands {
             }
 
             if (upgrade.getBaseName().equals(Upgrade.BATTERY_1.getBaseName())) {
-                EnergyStorage e = ContainerItemContext.withInitial(laser).find(EnergyStorage.ITEM);
-                if (e != null)
-                    ((EnergisedItem) e).updatedMaxEnergy(UpgradeBatteryLevels.BATTERY.getPower());
+                laser.getOrCreateTag().putLong("max_energy", UpgradeBatteryLevels.BATTERY.getPower());
             }
         });
     }

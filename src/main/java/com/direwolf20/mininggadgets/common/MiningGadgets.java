@@ -4,9 +4,9 @@ import com.direwolf20.mininggadgets.client.particles.ModParticles;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.containers.ModContainers;
 import com.direwolf20.mininggadgets.common.events.ServerTickHandler;
-import com.direwolf20.mininggadgets.common.items.EnergisedItem;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.ModItems;
+import com.direwolf20.mininggadgets.common.items.EnergisedItem;
 import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.sounds.OurSounds;
 import io.github.fabricators_of_create.porting_lib.util.LazyItemGroup;
@@ -68,7 +68,7 @@ public class MiningGadgets implements ModInitializer
 
         EnergyStorage.ITEM.registerFallback((itemStack, context) -> {
             if (itemStack.getItem() instanceof MiningGadget)
-                return new EnergisedItem(itemStack, Config.MININGGADGET_MAXPOWER.get());
+                return EnergisedItem.createSimpleStorage(context, Config.MININGGADGET_MAXPOWER.get(), Long.MAX_VALUE, Long.MAX_VALUE);
             return null;
         });
     }
