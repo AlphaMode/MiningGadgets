@@ -198,7 +198,7 @@ public class RenderBlockTileEntity extends BlockEntity implements CustomUpdateTa
     }
 
     private void freeze(ItemStack stack) {
-        int freezeCost = Config.UPGRADECOST_FREEZE.get() * -1;
+        int freezeCost = Config.UPGRADECOST_FREEZE.get();
         EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
         long energy = storage != null ? storage.getAmount() : 0;
 
@@ -228,7 +228,7 @@ public class RenderBlockTileEntity extends BlockEntity implements CustomUpdateTa
         EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
         if (storage != null)
             try (Transaction t = TransferUtil.getTransaction()) {
-                storage.insert(costOfOperation, t);
+                storage.extract(costOfOperation, t);
                 t.commit();
             }
 

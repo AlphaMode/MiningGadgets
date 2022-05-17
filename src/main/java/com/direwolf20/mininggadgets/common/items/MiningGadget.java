@@ -181,7 +181,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
         if (!PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(world, player, pos, state, null))
             return false;
 
-        return canMine(tool);
+        return player.isCreative() || canMine(tool);
     }
 
     @Override
@@ -438,16 +438,18 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
                 else*/
                         durability = durability - 1;
                         if (durability <= 0) {
-                            EnergyStorage storage = ContainerItemContext.ofPlayerHand((Player) player, InteractionHand.MAIN_HAND).find(EnergyStorage.ITEM);
-                            if (storage != null) {
-                                try (Transaction t = TransferUtil.getTransaction()) {
-                                    storage.extract(getEnergyCost(stack), t);
-                                    t.commit();
+                            if(!((Player) player).isCreative()) {
+                                EnergyStorage storage = ContainerItemContext.ofPlayerHand((Player) player, InteractionHand.MAIN_HAND).find(EnergyStorage.ITEM);
+                                if (storage != null) {
+                                    try (Transaction t = TransferUtil.getTransaction()) {
+                                        storage.extract(getEnergyCost(stack), t);
+                                        t.commit();
+                                    }
                                 }
-                            }
-                            if (MiningProperties.getPrecisionMode(stack)) {
-                                MiningProperties.setCanMine(stack, false);
-                                player.stopUsingItem();
+                                if (MiningProperties.getPrecisionMode(stack)) {
+                                    MiningProperties.setCanMine(stack, false);
+                                    player.stopUsingItem();
+                                }
                             }
                         }
                         te.setDurability(durability, stack);
@@ -479,7 +481,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
                     world.setBlockAndUpdate(pos, ModBlocks.MINERS_LIGHT.get().defaultBlockState());
                     if (storage != null)
                         try (Transaction t = TransferUtil.getTransaction()) {
-                            storage.insert((Config.UPGRADECOST_LIGHT.get() * -1), t);
+                            storage.extract((Config.UPGRADECOST_LIGHT.get()), t);
                             t.commit();
                         }
                 }
