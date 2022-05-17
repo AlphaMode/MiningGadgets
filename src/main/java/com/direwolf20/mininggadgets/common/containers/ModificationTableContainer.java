@@ -1,24 +1,23 @@
 package com.direwolf20.mininggadgets.common.containers;
 
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
-import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
-import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeTools;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.UpgradeCard;
+import com.direwolf20.mininggadgets.common.items.upgrade.Upgrade;
+import com.direwolf20.mininggadgets.common.items.upgrade.UpgradeTools;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
         this.playerInventory = playerInventory;
 
         setupContainerSlots();
-        layoutPlayerInventorySlots(8, 84);
+        layoutPlayerInventorySlots(31, 84);
     }
 
     public ModificationTableContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory) {
@@ -46,7 +45,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
         this.playerInventory = playerInventory;
 
         setupContainerSlots();
-        layoutPlayerInventorySlots(10, 70);
+        layoutPlayerInventorySlots(31, 70);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class ModificationTableContainer extends AbstractContainerMenu {
 
     private void setupContainerSlots() {
         Optional.ofNullable(TransferUtil.getItemStorage(this.getTE())).ifPresent(h -> {
-            addSlot(new WatchedSlot((ItemStackHandler) h, 0,  -16, 84, this::updateUpgradeCache));
+            addSlot(new WatchedSlot((ItemStackHandler) h, 0,  7, 84, this::updateUpgradeCache));
         });
     }
 

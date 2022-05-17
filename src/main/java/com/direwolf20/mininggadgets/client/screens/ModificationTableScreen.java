@@ -40,6 +40,8 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         this.tePos = container.getTE().getBlockPos();
         this.container = container;
         this.playerInventory = inv;
+        this.imageHeight = 166;
+        this.imageWidth = 199;
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             String string = ForgeI18n.getPattern(String.format("%s.%s", MiningGadgets.MOD_ID, "text.empty_table_helper"));
             String[] parts = string.split("\n");
             for (int i = 0; i < parts.length; i++) {
-                drawScaledCenteredString(stack, (relX + 17) - (font.width(parts[0]) / 2), (relY - 68) + (i * font.lineHeight), .8f, parts[i], 0xFFFFFF);
+                drawScaledCenteredString(stack, (relX + 29) - (font.width(parts[0]) / 2), (relY - 68) + (i * font.lineHeight), .8f, parts[i], 0xFFFFFF);
             }
         }
     }
@@ -82,14 +84,14 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
         RenderSystem.setShaderTexture(0, GUI);
         int relX = (this.width - this.imageWidth) / 2;
         int relY = (this.height - this.imageHeight) / 2;
-        this.blit(stack, relX - 23, relY, 0, 0, this.imageWidth + 23, this.imageHeight);
+        this.blit(stack, relX, relY, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override
     public void init() {
         super.init();
 
-        this.scrollingUpgrades = new ScrollingUpgrades(Minecraft.getInstance(), this.imageWidth - 14, 72, topPos + 7, leftPos + 7, this);
+        this.scrollingUpgrades = new ScrollingUpgrades(Minecraft.getInstance(), this.imageWidth - 37, 72, topPos + 7, leftPos + 30, this);
         this.addRenderableWidget(this.scrollingUpgrades);
    }
 
