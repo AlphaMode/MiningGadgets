@@ -1,30 +1,27 @@
 package com.direwolf20.mininggadgets.common.data;
 
-import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import com.direwolf20.mininggadgets.common.MiningGadgets;
+import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-public class Generator implements DataGeneratorEntrypoint {
-    @Override
-    public void onInitializeDataGenerator(FabricDataGenerator gen) {
-//         if( event.includeServer() )
-            registerServerProviders(gen);
+@Mod.EventBusSubscriber(modid = MiningGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class Generator {
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent event) {
+        var includeServer = event.includeServer();
+        var includeClient = event.includeClient();
+        var generator = event.getGenerator();
+        var helper = event.getExistingFileHelper();
 
-//        if( event.includeClient() )
-            registerClientProviders(gen);
-    }
+        // Client
+        generator.addProvider(includeClient, new GeneratorLanguage(generator));
+        generator.addProvider(includeClient, new GeneratorItemModels(generator, helper));
 
-    private static void registerServerProviders(FabricDataGenerator generator) {
-        generator.addProvider(new GeneratorLoot(generator));
-        generator.addProvider(new GeneratorRecipes(generator));
-    }
-
-    private static void registerClientProviders(FabricDataGenerator generator) {
-        ExistingFileHelper helper = null;
-
-        generator.addProvider(new GeneratorBlockTags(generator));
-        generator.addProvider(new GeneratorBlockStates(generator, helper));
-        generator.addProvider(new GeneratorItemModels(generator, helper));
-        generator.addProvider(new GeneratorLanguage(generator));
+        // Server
+        generator.addProvider(includeServer, new GeneratorLoot(generator));
+        generator.addProvider(includeServer, new GeneratorRecipes(generator));
+        generator.addProvider(includeServer, new GeneratorBlockTags(generator, helper));
+        generator.addProvider(includeServer, new GeneratorBlockStates(generator, helper));
     }
 }

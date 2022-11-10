@@ -1,5 +1,7 @@
 package com.direwolf20.mininggadgets.common;
 
+import com.direwolf20.mininggadgets.client.ClientEvents;
+import com.direwolf20.mininggadgets.client.ClientSetup;
 import com.direwolf20.mininggadgets.client.particles.ModParticles;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.containers.ModContainers;
@@ -9,14 +11,6 @@ import com.direwolf20.mininggadgets.common.items.ModItems;
 import com.direwolf20.mininggadgets.common.items.EnergisedItem;
 import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.sounds.OurSounds;
-import io.github.fabricators_of_create.porting_lib.util.LazyItemGroup;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -52,6 +46,8 @@ public class MiningGadgets implements ModInitializer
         ModBlocks.TILES_ENTITIES.register();
         ModContainers.CONTAINERS.register();
         ModParticles.PARTICLE_TYPES.register();
+        ModParticles.PARTICLE_TYPES.register(event);
+        OurSounds.SOUND_REGISTRY.register(event);
 
         OurSounds.registerSounds();
 

@@ -17,17 +17,6 @@ import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
 import com.direwolf20.mininggadgets.common.util.MagicHelpers;
 import com.direwolf20.mininggadgets.common.util.VectorHelper;
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.fabricators_of_create.porting_lib.item.ReequipAnimationItem;
-import io.github.fabricators_of_create.porting_lib.mixin.client.accessor.KeyMappingAccessor;
-import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
-import io.github.fabricators_of_create.porting_lib.util.ContinueUsingItem;
-import io.github.fabricators_of_create.porting_lib.util.DamageableItem;
-import io.github.fabricators_of_create.porting_lib.util.UsingTickItem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,9 +25,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -59,15 +48,24 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import team.reborn.energy.api.EnergyStorage;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.event.level.BlockEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
-public class MiningGadget extends Item implements UsingTickItem, ContinueUsingItem, DamageableItem, ReequipAnimationItem {
-    private int energyCapacity;
-    private Random rand = new Random();
+public class MiningGadget extends Item {
+    private final int energyCapacity;
+    private final Random rand = new Random();
     private LaserLoopSound laserLoopSound;
     //private static int energyPerItem = 15;
 
@@ -122,15 +120,15 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
         boolean sneakPressed = Screen.hasShiftDown();
 
         if (!sneakPressed) {
-            tooltip.add(new TranslatableComponent("mininggadgets.tooltip.item.show_upgrades",
+            tooltip.add(Component.translatable("mininggadgets.tooltip.item.show_upgrades",
                     "shift")
                     .withStyle(ChatFormatting.GRAY));
         } else {
-            tooltip.add(new TranslatableComponent("mininggadgets.tooltip.item.break_cost", getEnergyCost(stack)).withStyle(ChatFormatting.RED));
+            tooltip.add(Component.translatable("mininggadgets.tooltip.item.break_cost", getEnergyCost(stack)).withStyle(ChatFormatting.RED));
             if (!(upgrades.isEmpty())) {
-                tooltip.add(new TranslatableComponent("mininggadgets.tooltip.item.upgrades").withStyle(ChatFormatting.AQUA));
+                tooltip.add(Component.translatable("mininggadgets.tooltip.item.upgrades").withStyle(ChatFormatting.AQUA));
                 for (Upgrade upgrade : upgrades) {
-                    tooltip.add(new TextComponent(" - " +
+                    tooltip.add(Component.literal(" - " +
                             I18n.get(upgrade.getLocal())
                     ).withStyle(ChatFormatting.GRAY));
                 }
@@ -139,9 +137,9 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
 
         Optional.ofNullable(ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM))
                 .ifPresent(energy -> {
-                    TranslatableComponent energyText = !sneakPressed
-                            ? new TranslatableComponent("mininggadgets.gadget.energy", MagicHelpers.tidyValue(energy.getAmount()), MagicHelpers.tidyValue(energy.getCapacity()))
-                            : new TranslatableComponent("mininggadgets.gadget.energy", String.format("%,d", energy.getAmount()), String.format("%,d", energy.getCapacity()));
+                    MutableComponent energyText = !sneakPressed
+                            ? Component.translatable("mininggadgets.gadget.energy", MagicHelpers.tidyValue(energy.getAmount()), MagicHelpers.tidyValue(energy.getCapacity()))
+                            : Component.translatable("mininggadgets.gadget.energy", String.format("%,d", energy.getAmount()), String.format("%,d", energy.getCapacity()));
                     tooltip.add(energyText.withStyle(ChatFormatting.GREEN));
                 });
     }
@@ -149,7 +147,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
     @Override
     public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
         super.fillItemCategory(group, items);
-        if (!allowdedIn(group))
+        if (!allowedIn(group))
             return;
 
         ItemStack charged = new ItemStack(this);
@@ -233,7 +231,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
                 if (itemstack.getHoverName().getString().toLowerCase(Locale.ROOT).contains("mongo"))
                     player.playSound(SoundEvents.STONE_HIT, volume * 0.5f, 1f);
                 else
-                    player.playSound(OurSounds.LASER_START.getSound(), volume * 0.5f, 1f);
+                    player.playSound(OurSounds.LASER_START.get(), volume * 0.5f, 1f);
             return new InteractionResultHolder<>(InteractionResult.PASS, itemstack);
         }
 
@@ -319,7 +317,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
                 }
                 else {
                     if (laserLoopSound == null) {
-                        laserLoopSound = new LaserLoopSound((Player) player, volume);
+                        laserLoopSound = new LaserLoopSound((Player) player, volume, player.level.random);
                         Minecraft.getInstance().getSoundManager().play(laserLoopSound);
                     }
                 }
@@ -549,7 +547,7 @@ public class MiningGadget extends Item implements UsingTickItem, ContinueUsingIt
             if (laserLoopSound != null) {
                 float volume = MiningProperties.getVolume(stack);
                 if (volume != 0.0f && !laserLoopSound.isStopped()) {
-                    entityLiving.playSound(OurSounds.LASER_END.getSound(), volume * 0.5f, 1f);
+                    entityLiving.playSound(OurSounds.LASER_END.get(), volume * 0.5f, 1f);
                 }
                 laserLoopSound = null;
             }

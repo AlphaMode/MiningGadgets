@@ -14,6 +14,6 @@ public class GeneratorBlockTags extends BlockTagsProvider {
 
     @Override
     protected void addTags() {
-        tag(TagKey.create(Registry.BLOCK_REGISTRY, Registry.BLOCK.getKey(ModBlocks.MODIFICATION_TABLE.get()))).addTag(BlockTags.MINEABLE_WITH_PICKAXE);
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModBlocks.MODIFICATION_TABLE.get());
     }
 }

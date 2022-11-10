@@ -10,8 +10,9 @@ import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.network.packets.PacketExtractUpgrade;
 import com.direwolf20.mininggadgets.common.network.packets.PacketInsertUpgrade;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import io.github.fabricators_of_create.porting_lib.mixin.client.accessor.ScreenAccessor;
 import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
 import io.github.fabricators_of_create.porting_lib.util.client.ScrollPanel;
@@ -19,13 +20,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraftforge.client.gui.widget.ScrollPanel;
+import net.minecraftforge.common.ForgeI18n;
 
 public class ModificationTableScreen extends AbstractContainerScreen<ModificationTableContainer> {
     private ResourceLocation GUI = new ResourceLocation(MiningGadgets.MOD_ID, "textures/gui/modificationtable.png");
@@ -146,7 +148,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
 
             int index = 0;
             for (Upgrade upgrade : this.parent.container.getUpgradesCache()) {
-                Minecraft.getInstance().getItemRenderer().renderGuiItem(new ItemStack(upgrade.getCard()), x, y);
+                Minecraft.getInstance().getItemRenderer().renderGuiItem(new ItemStack(upgrade.getCardItem().get()), x, y);
 
                 if( isMouseOver(mouseX, mouseY) && (mouseX > x && mouseX < x + 15 && mouseY > y && mouseY < y + 15)  )
                     currentUpgrade = upgrade;
@@ -177,7 +179,7 @@ public class ModificationTableScreen extends AbstractContainerScreen<Modificatio
             super.render(stack, mouseX, mouseY, partialTicks);
 
             if( this.upgrade != null  )
-                this.parent.renderTooltip(stack, Lists.transform(this.upgrade.getStack().getTooltipLines(((ScreenAccessor)this.parent).port_lib$getMinecraft().player, TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mouseX, mouseY);
+                this.parent.renderTooltip(stack, Lists.transform(new ItemStack(this.upgrade.getCardItem().get()).getTooltipLines(((ScreenAccessor)this.parent).port_lib$getMinecraft().player, TooltipFlag.Default.NORMAL), Component::getVisualOrderText), mouseX, mouseY);
         }
 
         @Override

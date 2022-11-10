@@ -6,7 +6,6 @@ import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.fabricators_of_create.porting_lib.util.client.VertexUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -18,11 +17,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.List;
-import java.util.Random;
 
 public class RenderBlockTER implements BlockEntityRenderer<RenderBlockTileEntity> {
 
@@ -46,7 +46,7 @@ public class RenderBlockTER implements BlockEntityRenderer<RenderBlockTileEntity
                 f2 = 1f;
             }
 
-            VertexUtils.putBulkData(builder, matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn);
+            VertexUtils.putBulkData(builder, matrixEntry, bakedquad, f, f1, f2, alpha, combinedLightsIn, combinedOverlayIn, true);
         }
     }
 
@@ -87,23 +87,23 @@ public class RenderBlockTER implements BlockEntityRenderer<RenderBlockTileEntity
 
             VertexConsumer builder = bufferIn.getBuffer(RenderType.cutout());
             for (Direction direction : Direction.values()) {
-                renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, 1f, getQuads(ibakedmodel, tile, direction), combinedLightsIn, combinedOverlayIn);
+                renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, 1f, getQuads(ibakedmodel, tile, direction, RenderType.cutout()), combinedLightsIn, combinedOverlayIn);
             }
-            renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, 1f, getQuads(ibakedmodel, tile, null), combinedLightsIn, combinedOverlayIn);
+            renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, 1f, getQuads(ibakedmodel, tile, null, RenderType.cutout()), combinedLightsIn, combinedOverlayIn);
         } else if (breakType == MiningProperties.BreakTypes.FADE) {
             scale = Mth.lerp(scale, 0.1f, 1.0f);
             VertexConsumer builder = bufferIn.getBuffer(MyRenderType.RenderBlock);
             for (Direction direction : Direction.values()) {
                 if (!(tile.getLevel().getBlockState(tile.getBlockPos().relative(direction)).getBlock() instanceof RenderBlock)) {
-                    renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, scale, getQuads(ibakedmodel, tile, direction), combinedLightsIn, combinedOverlayIn);
+                    renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, scale, getQuads(ibakedmodel, tile, direction, MyRenderType.RenderBlock), combinedLightsIn, combinedOverlayIn);
                 }
             }
-            renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, scale, getQuads(ibakedmodel, tile, null), combinedLightsIn, combinedOverlayIn);
+            renderModelBrightnessColorQuads(matrixStackIn.last(), builder, f, f1, f2, scale, getQuads(ibakedmodel, tile, null, MyRenderType.RenderBlock), combinedLightsIn, combinedOverlayIn);
         }
         matrixStackIn.popPose();
     }
 
-    private List<BakedQuad> getQuads(BakedModel model, RenderBlockTileEntity tile, Direction side) {
-        return model.getQuads(tile.getRenderBlock(), side, new Random(Mth.getSeed(tile.getBlockPos())));
+    private List<BakedQuad> getQuads(BakedModel model, RenderBlockTileEntity tile, Direction side, RenderType type) {
+        return model.getQuads(tile.getRenderBlock(), side, RandomSource.create(Mth.getSeed(tile.getBlockPos())));
     }
 }
