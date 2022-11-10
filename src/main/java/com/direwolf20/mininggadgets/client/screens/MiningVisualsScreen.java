@@ -1,5 +1,6 @@
 package com.direwolf20.mininggadgets.client.screens;
 
+import com.direwolf20.mininggadgets.client.ForgeSlider;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
 import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.network.packets.PacketChangeBreakType;
@@ -7,12 +8,13 @@ import com.direwolf20.mininggadgets.common.network.packets.PacketChangeColor;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.widget.ForgeSlider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -184,7 +186,7 @@ public class MiningVisualsScreen extends Screen {
             return true;
         }
 
-        InputConstants.Key invKeyCode = KeyBindingHelper.getKeyCode(((ScreenAccessor)this).port_lib$getMinecraft().options.keyInventory);
+        InputConstants.Key invKeyCode = KeyBindingHelper.getBoundKeyOf(Screens.getClient(this).options.keyInventory);
         if (Objects.equals(invKeyCode, mouseKey)) {
             syncColors();
             removed();

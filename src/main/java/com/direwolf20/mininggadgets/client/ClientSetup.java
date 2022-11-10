@@ -22,9 +22,9 @@ public final class ClientSetup implements ClientModInitializer {
     public void onInitializeClient() {
         registerRenderers();
         registerContainerScreens();
-        OurKeys.register();
+        OurKeys.registerKeys();
         ClientEvents.init();
-        ParticleRenderDispatcher.registerFactories();
+        ParticleRenderDispatcher.registerProviders();
         RenderHandCallback.EVENT.register(EventRenderGadget::renderGadget);
     }
 

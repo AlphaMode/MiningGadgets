@@ -1,18 +1,18 @@
 package com.direwolf20.mininggadgets.common.data;
 
-import com.direwolf20.mininggadgets.common.MiningGadgets;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.minecraftforge.common.data.ExistingFileHelper;
 
-@Mod.EventBusSubscriber(modid = MiningGadgets.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Generator {
-    @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) {
-        var includeServer = event.includeServer();
-        var includeClient = event.includeClient();
-        var generator = event.getGenerator();
-        var helper = event.getExistingFileHelper();
+import java.util.Collections;
+
+public class Generator implements DataGeneratorEntrypoint {
+    @Override
+    public void onInitializeDataGenerator(FabricDataGenerator generator) {
+        var includeServer = true;
+        var includeClient = true;
+        var helper = new ExistingFileHelper(Collections.emptySet(), Collections.emptySet(),
+                true, null, null);
 
         // Client
         generator.addProvider(includeClient, new GeneratorLanguage(generator));
@@ -21,7 +21,7 @@ public class Generator {
         // Server
         generator.addProvider(includeServer, new GeneratorLoot(generator));
         generator.addProvider(includeServer, new GeneratorRecipes(generator));
-        generator.addProvider(includeServer, new GeneratorBlockTags(generator, helper));
+        generator.addProvider(includeServer, new GeneratorBlockTags(generator));
         generator.addProvider(includeServer, new GeneratorBlockStates(generator, helper));
     }
 }

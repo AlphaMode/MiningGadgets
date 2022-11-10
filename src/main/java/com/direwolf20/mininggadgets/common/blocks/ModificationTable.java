@@ -30,10 +30,6 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
@@ -71,7 +67,7 @@ public class ModificationTable extends Block implements EntityBlock {
         if (!world.isClientSide) {
             BlockEntity tileEntity = world.getBlockEntity(pos);
             if (tileEntity instanceof MenuProvider) {
-                NetworkUtil.openScreen((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
+                NetworkUtil.openGui((ServerPlayer) player, (MenuProvider) tileEntity, tileEntity.getBlockPos());
             } else {
                 throw new IllegalStateException("Our named container provider is missing!");
             }
@@ -87,11 +83,9 @@ public class ModificationTable extends Block implements EntityBlock {
             if (tileEntity != null) {
                 LazyOptional<Storage<ItemVariant>> cap = LazyOptional.ofObject(TransferUtil.getItemStorage(tileEntity));
                 cap.ifPresent(handler -> {
-                    try (Transaction t = TransferUtil.getTransaction()) {
-                        handler.iterable(t).forEach(view -> {
-                            Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), view.getResource().toStack((int) view.getAmount()));
-                        });
-                    }
+                    handler.iterator().forEachRemaining(view -> {
+                        Containers.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), view.getResource().toStack((int) view.getAmount()));
+                    });
                 });
             }
             super.onRemove(state, worldIn, pos, newState, isMoving);

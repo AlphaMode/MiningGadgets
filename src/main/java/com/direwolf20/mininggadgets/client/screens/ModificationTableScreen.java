@@ -26,8 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraftforge.client.gui.widget.ScrollPanel;
-import net.minecraftforge.common.ForgeI18n;
 
 public class ModificationTableScreen extends AbstractContainerScreen<ModificationTableContainer> {
     private ResourceLocation GUI = new ResourceLocation(MiningGadgets.MOD_ID, "textures/gui/modificationtable.png");

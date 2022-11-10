@@ -3,6 +3,7 @@ package com.direwolf20.mininggadgets.common.data;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.items.ModItems;
+import io.github.fabricators_of_create.porting_lib.data.LanguageProvider;
 import net.minecraft.data.DataGenerator;
 
 public class GeneratorLanguage extends LanguageProvider {

@@ -13,8 +13,8 @@ public class ModBlocks {
     /**
      * Deferred Registers for the our Main class to load.
      */
-    public static final LazyRegistrar<Block> BLOCKS = LazyRegistrar.create(ForgeRegistries.BLOCKS, MiningGadgets.MOD_ID);
-    public static final LazyRegistrar<BlockEntityType<?>> TILES_ENTITIES = LazyRegistrar.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<Block> BLOCKS = LazyRegistrar.create(Registry.BLOCK, MiningGadgets.MOD_ID);
+    public static final LazyRegistrar<BlockEntityType<?>> TILES_ENTITIES = LazyRegistrar.create(Registry.BLOCK_ENTITY_TYPE, MiningGadgets.MOD_ID);
 
     /**
      * Register our blocks to the above registers to be loaded when the mod is initialized

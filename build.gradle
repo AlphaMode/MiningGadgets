@@ -2,7 +2,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'io.github.juuxel.loom-quiltflower' version '1.+'
     id 'org.quiltmc.quilt-mappings-on-loom' version '4.+'
     id 'eclipse'
@@ -29,12 +29,13 @@ repositories {
         }
     }
     maven { url 'https://jitpack.io' }
-    maven { url = "https://mvn.devos.one/releases/" }
     maven { url = "https://mvn.devos.one/snapshots/" }
     maven {
         name = "ParchmentMC"
         url = "https://maven.parchmentmc.org/"
     }
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
+    maven { url = "https://dvs1.progwml6.com/files/maven/" }
     mavenLocal()
     mavenCentral()
 }
@@ -48,23 +49,22 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    modRuntimeOnly("mezz.jei:jei-${mc_version}-fabric:${jei_version}")
 
     //REI
-    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
+//    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
 
     implementation(include("com.electronwill.night-config:core:3.6.3"))
     implementation(include("com.electronwill.night-config:toml:3.6.3"))
-    modImplementation(include("curse.maven:forge-config-api-port-fabric-547434:${project.config_api_version}"))
+    modImplementation(include("net.minecraftforge:forgeconfigapiport-fabric:${project.config_api_version}"))
 
-    modImplementation(include("me.alphamode:ForgeTags:2.1"))
-    modImplementation(include("io.github.fabricators_of_create:Porting-Lib:${project.port_lib_version}+${project.mc_version}.${project.port_lib_hash}"))
+    modImplementation(include("io.github.fabricators_of_create.Porting-Lib:porting-lib:${project.port_lib_version}+${project.mc_version}"))
 
     include modApi('teamreborn:energy:2.2.0') {
         exclude(group: "net.fabricmc.fabric-api")
@@ -80,13 +80,6 @@ processResources {
     duplicatesStrategy = DuplicatesStrategy.INHERIT
 
     inputs.property "version", project.version
-
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version,
-                "mcversion": project.mc_version,
-                "forgeversion": project.forge_version,
-                "forgeshortversion": project.forge_version.split('\\.')[0]
-    }
 
 	doLast {
 	    def jsonMinifyStart = System.currentTimeMillis()

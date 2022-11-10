@@ -3,8 +3,8 @@ package com.direwolf20.mininggadgets.common.items.upgrade;
 import com.direwolf20.mininggadgets.common.Config;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.items.ModItems;
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 

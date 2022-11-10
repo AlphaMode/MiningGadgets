@@ -1,5 +1,6 @@
 package com.direwolf20.mininggadgets.client.screens;
 
+import com.direwolf20.mininggadgets.client.ForgeSlider;
 import com.direwolf20.mininggadgets.client.screens.widget.ToggleButton;
 import com.direwolf20.mininggadgets.common.MiningGadgets;
 import com.direwolf20.mininggadgets.common.items.gadget.MiningProperties;
@@ -9,6 +10,8 @@ import com.direwolf20.mininggadgets.common.network.PacketHandler;
 import com.direwolf20.mininggadgets.common.network.packets.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -18,7 +21,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.widget.ForgeSlider;
 
 import java.awt.*;
 import java.util.List;
@@ -183,11 +185,11 @@ public class MiningSettingScreen extends Screen {
 
         int top = (height / 2) - (containsFreeze ? 80 : 60);
 
-        drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.mining_gadget"), (width / 2) - 135, top, Color.WHITE.getRGB());
-        drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.toggle_upgrades"), (width / 2) + 10, top, Color.WHITE.getRGB());
+        drawString(stack, Screens.getTextRenderer(this), getTrans("tooltip.screen.mining_gadget"), (width / 2) - 135, top, Color.WHITE.getRGB());
+        drawString(stack, Screens.getTextRenderer(this), getTrans("tooltip.screen.toggle_upgrades"), (width / 2) + 10, top, Color.WHITE.getRGB());
 
         if( toggleableList.size() == 0 )
-            drawString(stack, ((ScreenAccessor)this).port_lib$getMinecraft().font, getTrans("tooltip.screen.no_upgrades"), (width / 2) + 10, top + 20, Color.GRAY.getRGB());
+            drawString(stack, Screens.getTextRenderer(this), getTrans("tooltip.screen.no_upgrades"), (width / 2) + 10, top + 20, Color.GRAY.getRGB());
 
         this.children().forEach(e -> {
             if( !(e instanceof ToggleButton) && !(e instanceof WhitelistButton) && !e.equals(freezeDelaySlider) )
@@ -230,7 +232,7 @@ public class MiningSettingScreen extends Screen {
     @Override
     public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
         InputConstants.Key mouseKey = InputConstants.getKey(p_keyPressed_1_, p_keyPressed_2_);
-        InputConstants.Key invKeyCode = KeyBindingHelper.getKeyCode(minecraft.options.keyInventory);
+        InputConstants.Key invKeyCode = KeyBindingHelper.getBoundKeyOf(minecraft.options.keyInventory);
         if (p_keyPressed_1_ == 256 || Objects.equals(invKeyCode, mouseKey)) {
             onClose();
 

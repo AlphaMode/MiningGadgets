@@ -17,6 +17,15 @@ import com.direwolf20.mininggadgets.common.tiles.RenderBlockTileEntity;
 import com.direwolf20.mininggadgets.common.util.MagicHelpers;
 import com.direwolf20.mininggadgets.common.util.VectorHelper;
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.fabricators_of_create.porting_lib.item.DamageableItem;
+import io.github.fabricators_of_create.porting_lib.item.UsingTickItem;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,23 +57,13 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.event.level.BlockEvent;
+import team.reborn.energy.api.EnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 
-public class MiningGadget extends Item {
-    private final int energyCapacity;
+public class MiningGadget extends Item implements DamageableItem, UsingTickItem {
     private final Random rand = new Random();
     private LaserLoopSound laserLoopSound;
     //private static int energyPerItem = 15;
@@ -75,14 +74,13 @@ public class MiningGadget extends Item {
                 .tab(MiningGadgets.itemGroup)
                 /*.setNoRepair() TODO: PORT*/);
 
-        this.energyCapacity = Config.MININGGADGET_MAXPOWER.get();
     }
 
     //TODO Add an override for onCreated and initialize all NBT Tags in it
 
     @Override
     public int getMaxDamage(ItemStack stack) {
-        return this.energyCapacity;
+        return Config.MININGGADGET_MAXPOWER.get();
     }
 
     @Override
@@ -188,12 +186,12 @@ public class MiningGadget extends Item {
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
         return false;
     }
 
     @Override
-    public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+    public boolean allowContinuingBlockBreaking(Player player, ItemStack oldStack, ItemStack newStack) {
         return true;
     }
 
@@ -214,7 +212,7 @@ public class MiningGadget extends Item {
             }
 
             if (world.isClientSide) {
-                if (((KeyMappingAccessor)OurKeys.shiftClickGuiBinding).port_lib$getKey() == InputConstants.UNKNOWN) {
+                if (KeyBindingHelper.getBoundKeyOf(OurKeys.shiftClickGuiBinding) == InputConstants.UNKNOWN) {
                     ModScreens.openGadgetSettingsScreen(itemstack);
                     return InteractionResultHolder.pass(itemstack);
                 }

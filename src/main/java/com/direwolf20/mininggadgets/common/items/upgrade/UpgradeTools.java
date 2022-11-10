@@ -2,6 +2,7 @@ package com.direwolf20.mininggadgets.common.items.upgrade;
 
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import com.direwolf20.mininggadgets.common.items.UpgradeCard;
+import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

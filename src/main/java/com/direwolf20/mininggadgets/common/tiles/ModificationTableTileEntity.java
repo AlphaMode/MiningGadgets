@@ -2,9 +2,9 @@ package com.direwolf20.mininggadgets.common.tiles;
 
 import com.direwolf20.mininggadgets.common.containers.ModificationTableContainer;
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
+import io.github.fabricators_of_create.porting_lib.extensions.INBTSerializable;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemTransferable;
-import io.github.fabricators_of_create.porting_lib.util.INBTSerializable;
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -18,15 +18,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -76,7 +69,7 @@ public class ModificationTableTileEntity extends BlockEntity implements MenuProv
             }
 
             @Override
-            public boolean isItemValid(int slot, @Nonnull ItemVariant variant) {
+            public boolean isItemValid(int slot, @Nonnull ItemVariant variant, long amount) {
                 return slot == 0 && variant.getItem() instanceof MiningGadget;
             }
         };
@@ -90,7 +83,7 @@ public class ModificationTableTileEntity extends BlockEntity implements MenuProv
 
     @Override
     public Component getDisplayName() {
-        return Component.literal(Registry.BLOCK_ENTITY_TYPE.getKey(Registry.BLOCK_ENTITY_TYPE.getKey(getType()).getPath());
+        return Component.literal(Registry.BLOCK_ENTITY_TYPE.getKey(getType()).getPath());
     }
 
     @Nullable
