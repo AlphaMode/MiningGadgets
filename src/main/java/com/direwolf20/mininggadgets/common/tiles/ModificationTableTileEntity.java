@@ -4,10 +4,10 @@ import com.direwolf20.mininggadgets.common.containers.ModificationTableContainer
 import com.direwolf20.mininggadgets.common.items.MiningGadget;
 import io.github.fabricators_of_create.porting_lib.extensions.INBTSerializable;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemTransferable;
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 import static com.direwolf20.mininggadgets.common.blocks.ModBlocks.MODIFICATIONTABLE_TILE;
 
-public class ModificationTableTileEntity extends BlockEntity implements MenuProvider, ItemTransferable {
+public class ModificationTableTileEntity extends BlockEntity implements MenuProvider, SidedStorageBlockEntity {
     public final LazyOptional<ItemStackHandler> handler = LazyOptional.of(this::createHandler);
 
     public ModificationTableTileEntity(BlockPos pos, BlockState state) {

@@ -53,12 +53,8 @@ dependencies {
     modRuntimeOnly("mezz.jei:jei-${mc_version}-fabric:${jei_version}")
 
     //REI
-//    modCompileOnly ("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
-//    modRuntimeOnly ("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}") {
-//        exclude(group: "net.fabricmc.fabric-api")
-//    }
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
 
     implementation(include("com.electronwill.night-config:core:3.6.3"))
     implementation(include("com.electronwill.night-config:toml:3.6.3"))
