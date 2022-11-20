@@ -5,10 +5,10 @@
       "item": "minecraft:golden_apple"
     },
     "g": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "s": {
-      "tag": "forge:slimeballs"
+      "tag": "c:slimeballs"
     },
     "u": {
       "item": "mininggadgets:upgrade_empty"

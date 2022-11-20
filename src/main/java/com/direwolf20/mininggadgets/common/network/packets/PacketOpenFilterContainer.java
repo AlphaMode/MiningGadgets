@@ -7,14 +7,19 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandle
 import me.pepperbell.simplenetworking.C2SPacket;
 import me.pepperbell.simplenetworking.SimpleChannel;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PacketOpenFilterContainer implements C2SPacket {
     public PacketOpenFilterContainer() { }
@@ -45,9 +50,20 @@ public class PacketOpenFilterContainer implements C2SPacket {
             };
 
             ghostInventory.deserializeNBT(stack.getOrCreateTagElement(MiningProperties.KEY_FILTERS));
-            sender.openMenu(new SimpleMenuProvider(
-                    (windowId, playerInventory, playerEntity) -> new FilterContainer(windowId, playerInventory, ghostInventory), Component.literal("")
-            ));
+            sender.openMenu(new ExtendedScreenHandlerFactory() {
+                @Override
+                public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {}
+
+                @Override
+                public Component getDisplayName() {
+                    return Component.literal("");
+                }
+
+                @Override
+                public @NotNull AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player playerEntity) {
+                    return new FilterContainer(windowId, playerInventory, ghostInventory);
+                }
+            });
         });
     }
 }

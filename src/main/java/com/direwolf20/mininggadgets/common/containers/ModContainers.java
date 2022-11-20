@@ -16,7 +16,7 @@ public class ModContainers {
 
     // Our containers
     public static final RegistryObject<MenuType<ModificationTableContainer>> MODIFICATIONTABLE_CONTAINER
-            = CONTAINERS.register("modificationtable", () -> new ExtendedScreenHandlerType(ModificationTableContainer::new));
+            = CONTAINERS.register("modificationtable", () -> new ExtendedScreenHandlerType<>(ModificationTableContainer::new));
 
     public static final RegistryObject<MenuType<FilterContainer>> FILTER_CONTAINER
             = CONTAINERS.register("filter_container", () -> new ExtendedScreenHandlerType<>(FilterContainer::new));

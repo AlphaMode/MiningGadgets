@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "g": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "i": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     "r": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "u": {
       "item": "mininggadgets:upgrade_empty"
