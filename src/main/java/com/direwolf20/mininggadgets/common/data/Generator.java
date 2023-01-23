@@ -4,6 +4,8 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Generator implements DataGeneratorEntrypoint {
@@ -11,7 +13,8 @@ public class Generator implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(FabricDataGenerator generator) {
         var includeServer = true;
         var includeClient = true;
-        var helper = new ExistingFileHelper(Collections.emptySet(), Collections.emptySet(),
+        var existingData = System.getProperty("mininggadgets.data.existingData").split(";");
+        var helper = new ExistingFileHelper(Arrays.stream(existingData).map(Paths::get).toList(), Collections.emptySet(),
                 true, null, null);
 
         // Client

@@ -10,7 +10,6 @@ import com.direwolf20.mininggadgets.common.blocks.ModBlocks;
 import com.direwolf20.mininggadgets.common.containers.ModContainers;
 import io.github.fabricators_of_create.porting_lib.event.client.RenderHandCallback;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 
@@ -40,7 +39,7 @@ public final class ClientSetup implements ClientModInitializer {
      * Client Registry for renders
      */
     private static void registerRenderers() {
-        BlockEntityRendererRegistry.register(ModBlocks.RENDERBLOCK_TILE.get(), RenderBlockTER::new);
-        BlockEntityRendererRegistry.register(ModBlocks.MODIFICATIONTABLE_TILE.get(), ModificationTableTER::new);
+        BlockEntityRenderers.register(ModBlocks.RENDERBLOCK_TILE.get(), RenderBlockTER::new);
+        BlockEntityRenderers.register(ModBlocks.MODIFICATIONTABLE_TILE.get(), ModificationTableTER::new);
     }
 }

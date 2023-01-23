@@ -12,6 +12,7 @@
   "license": "MIT",
   "icon": "mininggadgets-logo.png",
   "environment": "*",
+  "accessWidener": "mininggadgets.accesswidener",
   "entrypoints": {
     "main": [
       "com.direwolf20.mininggadgets.common.MiningGadgets"

@@ -2,10 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "g": {
-      "tag": "c:ingots/gold"
+      "tag": "c:gold_ingots"
     },
     "i": {
-      "tag": "c:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "r": {
       "tag": "c:dusts/redstone"

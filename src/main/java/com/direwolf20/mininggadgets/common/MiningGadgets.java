@@ -67,7 +67,7 @@ public class MiningGadgets implements ModInitializer
 
         EnergyStorage.ITEM.registerFallback((itemStack, context) -> {
             if (itemStack.getItem() instanceof MiningGadget)
-                return EnergisedItem.createSimpleStorage(context, Config.MININGGADGET_MAXPOWER.get(), Long.MAX_VALUE, Long.MAX_VALUE);
+                return EnergisedItem.createSimpleStorage(context, Config.MININGGADGET_MAXPOWER.get(), Long.MAX_VALUE);
             return null;
         });
     }

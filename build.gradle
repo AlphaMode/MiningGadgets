@@ -17,6 +17,24 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+loom {
+    accessWidenerPath = file("src/main/resources/mininggadgets.accesswidener")
+    runs {
+        datagen {
+            client()
+
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
+            vmArg "-Dfabric-api.datagen.modid=mininggadgets"
+
+            property "mininggadgets.data.existingData", file("src/main/resources").absolutePath
+
+            runDir "build/datagen"
+        }
+    }
+}
+
 repositories {
     // REI
     maven {
@@ -50,11 +68,11 @@ dependencies {
 
     //JEI
     modCompileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    modRuntimeOnly("mezz.jei:jei-${mc_version}-fabric:${jei_version}")
+//    modRuntimeOnly("mezz.jei:jei-${mc_version}-fabric:${jei_version}")
 
     //REI
     modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}")
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
+//    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}")
 
     implementation(include("com.electronwill.night-config:core:3.6.3"))
     implementation(include("com.electronwill.night-config:toml:3.6.3"))

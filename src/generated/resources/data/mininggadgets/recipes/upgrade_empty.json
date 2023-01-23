@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "d": {
-      "tag": "c:gems/diamond"
+      "tag": "c:diamonds"
     },
     "g": {
       "tag": "c:glass_panes"
     },
     "l": {
-      "tag": "c:gems/lapis"
+      "tag": "c:lapis"
     },
     "r": {
       "tag": "c:dusts/redstone"

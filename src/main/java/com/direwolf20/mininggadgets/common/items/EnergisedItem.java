@@ -17,28 +17,26 @@ import team.reborn.energy.api.base.SimpleBatteryItem;
  */
 @SuppressWarnings({"deprecation", "UnstableApiUsage"})
 public class EnergisedItem implements EnergyStorage {
-    public static EnergyStorage createSimpleStorage(ContainerItemContext ctx, long capacity, long maxInsert, long maxExtract) {
+    public static EnergyStorage createSimpleStorage(ContainerItemContext ctx, long capacity, long maxInsert) {
         StoragePreconditions.notNegative(capacity);
         StoragePreconditions.notNegative(maxInsert);
-        StoragePreconditions.notNegative(maxExtract);
 
         Item startingItem = ctx.getItemVariant().getItem();
 
         return new DelegatingEnergyStorage(
-                new EnergisedItem(ctx, capacity, maxInsert, maxExtract),
+                new EnergisedItem(ctx, capacity, maxInsert),
                 () -> ctx.getItemVariant().isOf(startingItem) && ctx.getAmount() > 0
         );
     }
 
     private final ContainerItemContext ctx;
     private long capacity;
-    private final long maxInsert, maxExtract;
+    private final long maxInsert;
 
-    private EnergisedItem(ContainerItemContext ctx, long capacity, long maxInsert, long maxExtract) {
+    private EnergisedItem(ContainerItemContext ctx, long capacity, long maxInsert) {
         this.ctx = ctx;
         this.capacity = capacity;
         this.maxInsert = maxInsert;
-        this.maxExtract = maxExtract;
     }
 
     /**
@@ -71,7 +69,7 @@ public class EnergisedItem implements EnergyStorage {
 
         long maxAmountPerCount = maxAmount / count;
         long currentAmountPerCount = getAmount() / count;
-        long insertedPerCount = Math.min(maxInsert, Math.min(maxAmountPerCount, capacity - currentAmountPerCount));
+        long insertedPerCount = Math.min(maxInsert, Math.min(maxAmountPerCount, getCapacity() - currentAmountPerCount));
 
         if (insertedPerCount > 0) {
             if (trySetEnergy(currentAmountPerCount + insertedPerCount, count, transaction)) {
@@ -84,23 +82,11 @@ public class EnergisedItem implements EnergyStorage {
 
     @Override
     public boolean supportsExtraction() {
-        return maxExtract > 0;
+        return false;
     }
 
     @Override
     public long extract(long maxAmount, TransactionContext transaction) {
-        long count = ctx.getAmount();
-
-        long maxAmountPerCount = maxAmount / count;
-        long currentAmountPerCount = getAmount() / count;
-        long extractedPerCount = Math.min(maxExtract, Math.min(maxAmountPerCount, currentAmountPerCount));
-
-        if (extractedPerCount > 0) {
-            if (trySetEnergy(currentAmountPerCount - extractedPerCount, count, transaction)) {
-                return extractedPerCount * count;
-            }
-        }
-
         return 0;
     }
 

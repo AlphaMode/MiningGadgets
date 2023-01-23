@@ -471,7 +471,7 @@ public class MiningGadget extends Item implements DamageableItem, UsingTickItem 
                 pos = lookingAt.getBlockPos().relative(side).relative(right);
 
             if (world.getMaxLocalRawBrightness(pos) <= 7 && world.getBlockState(pos).getMaterial() == Material.AIR) {
-                EnergyStorage storage = ContainerItemContext.withInitial(stack).find(EnergyStorage.ITEM);
+                EnergyStorage storage = ContainerItemContext.ofPlayerHand((Player) player, InteractionHand.MAIN_HAND).find(EnergyStorage.ITEM);
                 long energy = storage != null ? storage.getAmount() : 0;
                 if (energy > Config.UPGRADECOST_LIGHT.get()) {
                     world.setBlockAndUpdate(pos, ModBlocks.MINERS_LIGHT.get().defaultBlockState());

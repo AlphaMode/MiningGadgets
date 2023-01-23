@@ -1,0 +1,3 @@
+accessWidener v2 named
+accessible method net/minecraft/data/recipes/RecipeProvider has (Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/advancements/critereon/InventoryChangeTrigger$TriggerInstance;
+accessible method net/minecraft/data/recipes/RecipeProvider has (Lnet/minecraft/tags/TagKey;)Lnet/minecraft/advancements/critereon/InventoryChangeTrigger$TriggerInstance;
