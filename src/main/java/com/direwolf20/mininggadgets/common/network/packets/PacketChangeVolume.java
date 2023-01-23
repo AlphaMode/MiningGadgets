@@ -14,7 +14,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import java.util.function.Supplier;
 
 public class PacketChangeVolume implements C2SPacket {
-    private float volume;
+    private final float volume;
 
     public PacketChangeVolume(float volume) {
         this.volume = volume;
