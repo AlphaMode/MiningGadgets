@@ -46,10 +46,10 @@ public class MiningGadgets implements ModInitializer
     @Override
     public void onInitialize() {
         // Register all of our items, blocks, item blocks, etc
-        ModItems.ITEMS.register();
         ModItems.UPGRADE_ITEMS.register();
         ModBlocks.BLOCKS.register();
         ModBlocks.TILES_ENTITIES.register();
+        ModItems.ITEMS.register();
         ModContainers.CONTAINERS.register();
         ModParticles.PARTICLE_TYPES.register();
         OurSounds.SOUND_REGISTRY.register();
